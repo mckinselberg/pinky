@@ -3,21 +3,30 @@ import ground from './assets/platform.png';
 import marioSm from './assets/sprites/mario-sm.png';
 import tree from './assets/tree.png';
 import goomba from './assets/sprites/goomba.png';
+import coin from './assets/coin.png';
 
 let player,
-    playerStartX = 100,
-    playerStartY = 450,
+    playerIsHiding,
+    trees,
     colliderPlayerPlatform,
+    createOverlapPlayerEnemies,
     enemies,
     platforms,
     platformEnds,
     cursors,
-    gameOver = false,
+    gravity = 300,
+    coins,
+    initialNumberOfCoins = 12,
     score = 0,
     scoreText,
-    gravity = 300;
+    gameOver = false,
+    gameOverText,
+    successText,
+    velocity = 160;
 
-const preload = function preload () {
+const random = (min, max) => Phaser.Math.RND.integerInRange(min, max)
+
+function preload () {
   this.cameras.main.setBackgroundColor('#ccccff'); 
   this.load.image('ground', ground);
   this.load.image('tree', tree);
@@ -31,6 +40,7 @@ const preload = function preload () {
     goomba,
     { frameWidth: 32, frameHeight: 32 }
   );
+  this.load.image('coin', coin);
 };
 
 function createPlatforms() {
@@ -47,8 +57,17 @@ function createPlatforms() {
 function createEnemies() {
   enemies = this.physics.add.group();
   platformEnds = this.physics.add.group();
-  platforms.children.iterate(function (platform) {
-    let enemy = this.physics.add.sprite(platform.x, platform.y - 100, 'goomba');
+  platforms.children.iterate(function (platform, i) {
+    if (i === 0) return;
+    let enemy = this.physics.add.sprite(
+      random(platform.x - platform.displayWidth / 2 + 50, platform.x + platform.displayWidth / 2 - 50),
+      // platform.y - 100,
+      platform.y - 30,
+      'goomba'
+    );
+    enemy.body.setSize(20, 28, true);
+
+    enemy.setVelocityX(random(-300, 300));
     enemy.setBounce(0.1);
     enemy.setCollideWorldBounds(true);
     enemy.body.setGravityY(gravity);
@@ -75,41 +94,91 @@ function createEnemies() {
   }, null, this);
 }
 
+createOverlapPlayerEnemies = function createOverlapPlayerEnemies() {
+  this.physics.add.overlap(player, enemies, (data) => {
+    if (playerIsHiding) {
+      return;
+    } else {
+      player.setTint(0xff0000);
+      player.anims.play('turn');
+      player.setVelocityY(-300);
+      this.physics.world.removeCollider(colliderPlayerPlatform);
+      player.setCollideWorldBounds(false);
+      gameOver = true;
+    }
+  });
+}
+
+function createCoins() {
+  coins = this.physics.add.group({
+    key: 'coin',
+    repeat: initialNumberOfCoins -1,
+    setXY: { x: 12, y: 0, stepX: canvasWidth / initialNumberOfCoins },
+  });
+  coins.children.iterate(function (coin) {
+    coin.setCollideWorldBounds(true);
+    coin.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+  });
+  this.physics.add.collider(coins, platforms);
+  this.physics.add.overlap(player, coins, collectCoin, null, this);
+}
+
+function createGameOverText() {
+  gameOverText = this.add.text(400, 300, 'Game Over', { fontSize: '50px', fill: '#ff0000' });
+  gameOverText.setOrigin(0.5);
+  gameOverText.setVisible(false);
+}
+
+function createResetButton() {
+  const resetButton = this.add.text(700, 16, 'Reset', { fontSize: '25px', fill: '#000' });
+  resetButton.setInteractive();
+  resetButton.on('pointerdown', () => { this.scene.restart(); });
+};
+
+function createSuccessText() {
+  successText = this.add.text(400, 300, 'You Win!', { fontSize: '50px', fill: '#000' });
+  successText.setOrigin(0.5);
+  successText.setVisible(false);
+}
+
 function create() {
-  this.add.image(600, 435, 'tree');
+  score = 0,
+  gameOver = false;
+
+  // reset button
+  createResetButton.bind(this)();
+
+  // success text
+  createSuccessText.bind(this)();
+
+  // set up the cursors
   cursors = this.input.keyboard.createCursorKeys(); 
-  
+
+  // place the platforms
   createPlatforms.bind(this)();
-  createEnemies.bind(this)();
+
+  // place the player
   player = this.physics.add.sprite(100, 450, 'marioSm');
+
+  // place the trees
+  trees = this.physics.add.staticGroup();
+  trees.create(200, 60, 'tree')
+  trees.create(600, 435, 'tree');
+  trees.create(400, 160, 'tree');
+  trees.children.iterate(function(tree, idx) {
+    tree.body.setSize(50, 40);
+    if (idx === 0) tree.setFlipX(true);
+  })
+  this.physics.add.collider(trees, platforms);
+
+  // create enemies
+  createEnemies.bind(this)();
   
   // player
   player.setBounce(0.1);
   player.setCollideWorldBounds(true);
   player.body.setGravityY(gravity);
   colliderPlayerPlatform = this.physics.add.collider(player, platforms);
-
-  // enemy
-  enemies.children.iterate(function (enemy) {
-    enemy.setBounce(0.1);
-    enemy.setCollideWorldBounds(true);
-    enemy.body.setGravityY(gravity);
-    this.physics.add.collider(enemy, platforms);
-
-    // player overlap with enemy
-    const colliderPlayerEnemy = this.physics.add.collider(player, enemies, (data) => {
-      player.setTint(0xff0000);
-      player.anims.play('turn');
-      player.setVelocityX(0);
-      player.setVelocityY(-300);
-      this.physics.world.removeCollider(colliderPlayerPlatform);
-      this.physics.world.removeCollider(colliderPlayerEnemy);
-      player.setCollideWorldBounds(false);
-      gameOver = true;
-    });
-  }, this);
-  
-
   // player animations
   this.anims.create({
     key: 'left',
@@ -141,26 +210,57 @@ function create() {
     repeat: -1
   });
 
+  // enemies
+  enemies.children.iterate(function (enemy) {
+    enemy.setBounce(0.1);
+    enemy.setCollideWorldBounds(true);
+    enemy.body.setGravityY(gravity);
+    this.physics.add.collider(enemy, platforms);
+  }, this);
   // enemy animations
   this.anims.create({
-    key: 'gombaMove',
+    key: 'goombaMove',
     frames: this.anims.generateFrameNumbers('goomba', { start: 0, end: 1 }),
     frameRate: 10,
     repeat: -1,
   });
   this.anims.create({
-    key: 'gombaTurn',
+    key: 'goombaTurn',
     frames: [ { key: 'goomba', frame: 0 } ],
     frameRate: 20,
     repeat: -1,
   });
+  
+  // player overlap with enemy
+  createOverlapPlayerEnemies.bind(this)();
+  
+  // coins
+  createCoins.bind(this)();
+  
+  // game over text
+  createGameOverText.bind(this)();
+  
+
+  // this.physics.add.collider(enemies, coins, function (enemy, coin) {
+  //   enemy.setVelocityX(enemy.body.velocity.x * 1.0002);
+  //   coin.setVelocityX(coin.body.velocity.x + 10);
+  //   coin.setVelocityY(coin.body.velocity.y - 10);
+  // }, null, this);
+
+  // score
+  scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '25px', fill: '#000' });
 };
+
+function collectCoin(player, coin) {
+  coin.disableBody(true, true);
+  score += 1;
+  scoreText.setText('Score: ' + score);
+}
 
 function isJumping(player) {
   return !player.body.touching.down && !player.body.blocked.down;
 }
 
-const velocity = 160;
 function handlePlayer() {
   const playerIsJumping = isJumping.bind(null, player);
   // left
@@ -216,7 +316,7 @@ function handlePlayer() {
 
 function handleEnemies() {
   enemies.children.iterate(function (enemy) {
-    enemy.anims.play('gombaMove', true);
+    enemy.anims.play('goombaMove', true);
     if (enemy.body.blocked.left) {
       enemy.setVelocityX(100);
     } else if (enemy.body.blocked.right) {
@@ -227,12 +327,25 @@ function handleEnemies() {
   }, this);
 }
 
+function handleplayerIsHiding() {
+  const overlap = this.physics.overlap(player, trees);
+  playerIsHiding = overlap ? true : false;
+}
+
 const update = function update() {
   if (gameOver) {
+    gameOverText.setVisible(true);
     return;
   }
+  if (score === initialNumberOfCoins) {
+    successText.setVisible(true);
+    gameOverText.setVisible(false);
+    return;
+  }
+
   handlePlayer();
   handleEnemies();
+  handleplayerIsHiding.bind(this)();
 };
 
 const canvasWidth = 800, canvasHeight = 600;
@@ -252,4 +365,5 @@ const config = {
     update: update,
   },
 };
+
 const game = new Phaser.Game(config);
