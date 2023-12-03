@@ -22,6 +22,7 @@ let player,
     gameOver = false,
     gameOverText,
     successText,
+    winner = false,
     velocity = 160;
 
 const random = (min, max) => Phaser.Math.RND.integerInRange(min, max)
@@ -95,7 +96,7 @@ function createEnemies() {
 }
 
 createOverlapPlayerEnemies = function createOverlapPlayerEnemies() {
-  this.physics.add.overlap(player, enemies, (data) => {
+  this.physics.add.overlap(player, enemies, function () {
     if (playerIsHiding) {
       return;
     } else {
@@ -106,7 +107,9 @@ createOverlapPlayerEnemies = function createOverlapPlayerEnemies() {
       player.setCollideWorldBounds(false);
       gameOver = true;
     }
-  });
+  }, function() {
+    return winner ? false : true;
+  }, this);
 }
 
 function createCoins() {
@@ -144,6 +147,7 @@ function createSuccessText() {
 function create() {
   score = 0,
   gameOver = false;
+  winner = false;
 
   // reset button
   createResetButton.bind(this)();
@@ -340,6 +344,7 @@ const update = function update() {
   if (score === initialNumberOfCoins) {
     successText.setVisible(true);
     gameOverText.setVisible(false);
+    winner = true;
     return;
   }
 
