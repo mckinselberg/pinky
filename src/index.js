@@ -1,6 +1,6 @@
 import Phaser from "phaser";
 import ground from './assets/platform.png';
-import marioSm from './assets/sprites/mario-sm.png';
+import pinky from './assets/sprites/pinky-sm.png';
 import tree from './assets/tree.png';
 import goomba from './assets/sprites/goomba.png';
 import coin from './assets/coin.png';
@@ -16,7 +16,7 @@ let player,
     cursors,
     gravity = 300,
     coins,
-    initialNumberOfCoins = 12,
+    initialNumberOfCoins = 24,
     score = 0,
     scoreText,
     gameOver = false,
@@ -28,12 +28,12 @@ let player,
 const random = (min, max) => Phaser.Math.RND.integerInRange(min, max)
 
 function preload () {
-  this.cameras.main.setBackgroundColor('#ccccff'); 
+  this.cameras.main.setBackgroundColor('#6bb6ff'); 
   this.load.image('ground', ground);
   this.load.image('tree', tree);
   this.load.spritesheet(
-    'marioSm',
-    marioSm,
+    'pinky',
+    pinky,
     { frameWidth: 32, frameHeight: 32 }
   );
   this.load.spritesheet(
@@ -127,19 +127,19 @@ function createCoins() {
 }
 
 function createGameOverText() {
-  gameOverText = this.add.text(400, 300, 'Game Over', { fontSize: '50px', fill: '#ff0000' });
+  gameOverText = this.add.text(400, 300, 'Game Over', { fontSize: '50px', fill: '#ff0000', fontFamily: 'Planes_ValMore' });
   gameOverText.setOrigin(0.5);
   gameOverText.setVisible(false);
 }
 
 function createResetButton() {
-  const resetButton = this.add.text(700, 16, 'Reset', { fontSize: '25px', fill: '#000' });
+  const resetButton = this.add.text(700, 16, 'Reset', { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
   resetButton.setInteractive();
   resetButton.on('pointerdown', () => { this.scene.restart(); });
 };
 
 function createSuccessText() {
-  successText = this.add.text(400, 300, 'You Win!', { fontSize: '50px', fill: '#000' });
+  successText = this.add.text(400, 300, 'You Win!', { fontSize: '50px', fill: '#000', fontFamily: 'Planes_ValMore' });
   successText.setOrigin(0.5);
   successText.setVisible(false);
 }
@@ -162,7 +162,7 @@ function create() {
   createPlatforms.bind(this)();
 
   // place the player
-  player = this.physics.add.sprite(100, 450, 'marioSm');
+  player = this.physics.add.sprite(100, 450, 'pinky');
 
   // place the trees
   trees = this.physics.add.staticGroup();
@@ -186,30 +186,30 @@ function create() {
   // player animations
   this.anims.create({
     key: 'left',
-    frames: this.anims.generateFrameNumbers('marioSm', { start: 2, end: 3 }),
+    frames: this.anims.generateFrameNumbers('pinky', { start: 2, end: 3 }),
     frameRate: 10,
     repeat: -1,
   });
   this.anims.create({
     key: 'turn',
-    frames: [ { key: 'marioSm', frame: 0 } ],
+    frames: [ { key: 'pinky', frame: 0 } ],
     frameRate: 20
   });
   this.anims.create({
     key: 'right',
-    frames: this.anims.generateFrameNumbers('marioSm', { start: 2, end: 3 }),
+    frames: this.anims.generateFrameNumbers('pinky', { start: 2, end: 3 }),
     frameRate: 10,
     repeat: -1
   });
   this.anims.create({
     key: 'jump',
-    frames: this.anims.generateFrameNumbers('marioSm', { start: 3, end: 3 }),
+    frames: this.anims.generateFrameNumbers('pinky', { start: 4, end: 4 }),
     frameRate: 10,
     repeat: -1
   });
   this.anims.create({
     key: 'duck',
-    frames: [ { key: 'marioSm', frame: 5 } ],
+    frames: [ { key: 'pinky', frame: 5 } ],
     frameRate: 10,
     repeat: -1
   });
@@ -228,12 +228,12 @@ function create() {
     frameRate: 10,
     repeat: -1,
   });
-  this.anims.create({
-    key: 'goombaTurn',
-    frames: [ { key: 'goomba', frame: 0 } ],
-    frameRate: 20,
-    repeat: -1,
-  });
+  // this.anims.create({
+  //   key: 'goombaTurn',
+  //   frames: [ { key: 'goomba', frame: 0 } ],
+  //   frameRate: 20,
+  //   repeat: -1,
+  // });
   
   // player overlap with enemy
   createOverlapPlayerEnemies.bind(this)();
@@ -252,11 +252,12 @@ function create() {
   // }, null, this);
 
   // score
-  scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '25px', fill: '#000' });
+  scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
 };
 
 function collectCoin(player, coin) {
   coin.disableBody(true, true);
+  coin.destroy();
   score += 1;
   scoreText.setText('Score: ' + score);
 }
@@ -310,17 +311,25 @@ function handlePlayer() {
     player.anims.play('jump', true);
   } else if (cursors.up.isUp) {
     player.setVelocityY(player.body.velocity.y + 10);
+  } else if (playerIsJumping()) {
+    player.anims.play('jump', true);
   }
 
   // duck
   if (cursors.down.isDown && !playerIsJumping() && cursors.left.isUp && cursors.right.isUp) {
     player.anims.play('duck', true);
+    playerIsHiding = true;
   }
 }
 
 function handleEnemies() {
   enemies.children.iterate(function (enemy) {
     enemy.anims.play('goombaMove', true);
+    if (enemy.body.velocity.x > 0) {
+      enemy.flipX = false;
+    } else if (enemy.body.velocity.x < 0) {
+      enemy.flipX = true;
+    }
     if (enemy.body.blocked.left) {
       enemy.setVelocityX(100);
     } else if (enemy.body.blocked.right) {

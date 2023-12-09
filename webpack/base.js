@@ -31,6 +31,17 @@ module.exports = {
         test: /\.(mp3|ogg)$/,
         loader: "file-loader"
       },
+      // {
+      //   // match fonts in ttfs and woffs
+      //   test: /\.(ttf|woff|woff2)$/,
+      //   loader: "file-loader",
+      //   options: {
+      //     name: "[name].[ext]",
+      //     outputPath: "assets/fonts/",
+      //     publicPath: "assets/fonts/",
+      //     esModule: false,
+      //   }
+      // }
     ]
   },
   plugins: [
