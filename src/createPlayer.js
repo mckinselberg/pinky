@@ -1,12 +1,13 @@
 import constants from './constants';
 
-const { gravity } = constants;
+const { gravity, canvasWidth } = constants;
 
-function createPlayer(_this, playerName) {
-  const player = _this.physics.add.sprite(100, 450, playerName);
+function createPlayer(_this, playerName, positionX, positionY) {
+  const player = _this.physics.add.sprite(positionX, positionY, playerName);
   player.setBounce(0.1);
   player.setCollideWorldBounds(true);
   player.body.setGravityY(gravity);
+  player.body.setSize(10, 28, true);
 
   _this.anims.create({
     key: 'left',
@@ -15,7 +16,7 @@ function createPlayer(_this, playerName) {
     repeat: -1,
   });
   _this.anims.create({
-    key: 'turn',
+    key: 'stand',
     frames: [ { key: playerName, frame: 0 } ],
     frameRate: 20
   });
@@ -27,13 +28,19 @@ function createPlayer(_this, playerName) {
   });
   _this.anims.create({
     key: 'jump',
-    frames: _this.anims.generateFrameNumbers(playerName, { start: 4, end: 4 }),
+    frames: _this.anims.generateFrameNumbers(playerName, { start: 4, end: 5 }),
+    frameRate: 2,
+    repeat: -1
+  });
+  _this.anims.create({
+    key: 'falling',
+    frames: [ { key: playerName, frame: 5 } ],
     frameRate: 10,
     repeat: -1
   });
   _this.anims.create({
-    key: 'duck',
-    frames: [ { key: playerName, frame: 5 } ],
+    key: 'hide',
+    frames: [ { key: playerName, frame: 6 } ],
     frameRate: 10,
     repeat: -1
   });
