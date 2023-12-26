@@ -20,7 +20,11 @@ const { canvasWidth, canvasHeight, gravity, playerVelocity } = constants;
 
 let player,
     playerIsHiding = { value: false },
-    playerIsInvincible = { value: false, powerUpActive: false },
+    playerIsInvincible = { 
+      value: false,
+      powerUpActive: false,
+      powerUpMessage: '🔽 hide from blue guys.'
+    },
     trees,
     colliderPlayerPlatform,
     enemies,
@@ -28,7 +32,7 @@ let player,
     platforms,
     cursors,
     score = { value: 0 },
-    initialNumberOfCoins = 8,
+    initialNumberOfCoins = 6,
     coinsToWin = initialNumberOfCoins,
     winner = false,
     scoreText,
@@ -37,7 +41,8 @@ let player,
     successText,
     levelText,
     enemyVelocity,
-    bonusCoin;
+    bonusCoin,
+    level = 3;
 
 function preload () {
   this.cameras.main.setBackgroundColor('#6bb6ff');
@@ -63,7 +68,7 @@ function preload () {
 function createPlatforms(_this) {
   // platforms
   platforms = _this.physics.add.staticGroup();
-  for (let i = 2; i < 10; i++) {
+  for (let i = 4; i < 10; i++) {
     platforms.create(canvasWidth + (i * 15), 60 * i + 20, 'ground').setScale(.5*i,1).refreshBody();
   }
   return platforms;
@@ -72,11 +77,10 @@ function createPlatforms(_this) {
 function createTrees(_this, platforms = null) {
   const trees = _this.physics.add.staticGroup();
 
-  for (let i = 2; i < 10; i++) {
-    trees.create((canvasWidth - i * 10) - 50, 60 * i - 20, 'tree');
+  for (let i = 0; i < canvasWidth; i+=canvasWidth/10) {
+    trees.create(canvasWidth - i - 40, canvasHeight - 20, 'tree');
   }
   trees.children.iterate(function(tree, idx) {
-    // tree.setScale(1.5, .85).refreshBody();
     tree.body.setSize(50, 40);
     if (idx === 0) tree.setFlipX(true);
   });
@@ -93,7 +97,7 @@ function create() {
 
   let font = new FontFaceObserver('Planes_ValMore');
   scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
-  levelText = this.add.text(16, 40, 'Level: 3', { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
+  levelText = this.add.text(16, 40, `Level: ${level}`, { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
   
   font.load().then(() => {
     // game over text
@@ -112,18 +116,26 @@ function create() {
   platforms = createPlatforms(this);
   
   // create enemies
-  enemies  = createEnemies(this, platforms, gravity, [3], enemyVelocity, 'enemy', 'left');
-  enemies2 = createEnemies(this, platforms, gravity, [3], 100, 'enemy2', 'right');
+  enemies  = createEnemies(this, platforms, gravity, [1], enemyVelocity, 'enemy', 'left');
+  enemies2 = createEnemies(this, platforms, gravity, [1], 100, 'enemy2', 'right');
   
   // trees
-  // trees = createTrees(this);
+  trees = createTrees(this);
   
   // player
   player = createPlayer(this, 'pinky', canvasWidth/2, 10);
   colliderPlayerPlatform = this.physics.add.collider(player, platforms);
 
   for (let i = 0; i < initialNumberOfCoins; i++) {
-    i !== 3 && createSingleCoin(this, platforms, player, canvasWidth, 1, score, scoreText, (canvasWidth - i * 12) - 60, 60 * i + 65);
+    i !== 1 && createSingleCoin({
+      _this: this,
+      platforms: platforms,
+      player: player,
+      score: score,
+      scoreText: scoreText,
+      xPosition: (canvasWidth - i * 12) - 60,
+      yPosition: 60 * i + 200
+    });
   }
   
   this.anims.create({
@@ -163,14 +175,13 @@ const update = function update() {
     winner = false;
     score.value = 0;
     setTimeout(() => {
-      this.scene.stop('level3');
-      this.scene.start('level4');
+      this.scene.stop(`level${level}`);
+      this.scene.start(`level${level + 1}`);
     }, 2000);
     enemies.clear(true, true);
     enemies2.clear(true, true);
     return;
   }
-
 
 
   handlePlayer(this, cursors, player, playerVelocity, { value: false }, playerIsInvincible);
@@ -179,7 +190,7 @@ const update = function update() {
 };
 
 export default {
-  key: 'level3',
+  key: `level${level}`,
   preload,
   create,
   update,

@@ -32,7 +32,8 @@ scoreText,
 successText,
 trees,
 winner = false,
-levelText;
+levelText,
+level = 2;
 
 function preload () {
   this.load.image('background3', background3)
@@ -80,7 +81,7 @@ function create() {
   
   let font = new FontFaceObserver('Planes_ValMore');
   scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
-  levelText = this.add.text(16, 40, 'Level: 2', { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
+  levelText = this.add.text(16, 40, `Level: ${level}`, { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
 
   font.load().then(() => {
     // game over text
@@ -106,7 +107,7 @@ function create() {
 
   // player
   player = createPlayer(this, 'pinky', canvasWidth/2 - 200, 450);
-  createCoins(this, platforms, player, canvasWidth, initialNumberOfCoins, score, scoreText);
+  createCoins(this, platforms, player, canvasWidth, initialNumberOfCoins, score, scoreText, null, 0);
   createCoins(this, platforms, player, canvasWidth, 3, score, scoreText, canvasWidth / 2, canvasHeight - 100);
   // createSingleCoin(this, platforms, player, canvasWidth, 1, score, scoreText, canvasWidth / 2, canvasHeight - 100);
   
@@ -144,8 +145,8 @@ const update = function update() {
     winner = false;
     score.value = 0;
     setTimeout(() => {
-      this.scene.stop('level2');
-      this.scene.start('level3');
+      this.scene.stop(`level${level}`);
+      this.scene.start(`level${level + 1}`);
     }, 2000);
     enemies.clear(true, true);
     return;
@@ -158,7 +159,7 @@ const update = function update() {
 };
 
 export default {
-  key: 'level2',
+  key: `level${level}`,
   preload,
   create,
   update,

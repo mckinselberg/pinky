@@ -75,8 +75,6 @@ function create() {
   createCoins(this, platforms, player, canvasWidth, initialNumberOfCoins, score, scoreText, canvasWidth / 2, 0);
   
   this.add.image(400, canvasHeight, 'tree');
-  
-  // this.physics.world.createDebugGraphic();
 }
 
 function update() {
@@ -92,7 +90,7 @@ function update() {
       this.scene.start('level1');
     }, 2000);
   }
-  // this.scene.start('level1');
+  this.scene.start('level5');
 }
 
 

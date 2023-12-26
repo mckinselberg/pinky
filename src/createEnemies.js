@@ -31,11 +31,9 @@ function createEnemies(
       enemySprite
     );
     enemy.body.setSize(20, 28, true);
-
     enemy.setVelocityX(random(-enemyVelocity, enemyVelocity));
-    enemy.setBounce(0.1);
-    enemy.setCollideWorldBounds(true);
     enemy.body.setGravityY(gravity);
+    enemy.setBounce(0.1);
     _this.physics.add.collider(enemy, platforms);
 
     // platform ends
@@ -56,7 +54,8 @@ function createEnemies(
 
   _this.physics.add.overlap(enemies, platformEnds, function (enemy, end) {
     enemy.setVelocityX(-enemy.body.velocity.x);
-  }, null, this);  
+  }, null, this);
+
 
   // enemies
   enemies.children.iterate(function (enemy) {
@@ -64,14 +63,23 @@ function createEnemies(
     enemy.setCollideWorldBounds(true);
     enemy.body.setGravityY(gravity);
     _this.physics.add.collider(enemy, platforms);
-  }, this);
-  // enemy animations
+  }, this);  // enemy animations
   _this.anims.create({
     key: `${enemySprite}Move`,
     frames: _this.anims.generateFrameNumbers(enemySprite, { start: 0, end: 1 }),
     frameRate: 10,
     repeat: -1,
   });
+  _this.anims.create({
+    key: `${enemySprite}Die`,
+    frames: _this.anims.generateFrameNumbers(enemySprite, { start: 2, end: 3 }),
+    frameRate: 10,
+    repeat: -1,
+  });
+
+  enemies.children.iterate(function (enemy) {
+    enemy.anims.play(`${enemySprite}Move`, true);
+  }, _this);
 
   return enemies;
 }

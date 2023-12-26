@@ -32,8 +32,8 @@ let player,
     gameOverText,
     successText,
     winner = false,
-    levelText;
-
+    levelText,
+    level = 1;
 
 function preload () {
   this.load.image('background2', background2);
@@ -41,8 +41,8 @@ function preload () {
   this.load.spritesheet('enemy', enemy, { frameWidth: 32, frameHeight: 32 });
 };
 
+// platforms
 function createPlatforms(_this) {
-  // platforms
   platforms = _this.physics.add.staticGroup();
   platforms.create(400, 600, 'ground').setScale(2).refreshBody();
   platforms.create(100, 400, 'ground');
@@ -50,7 +50,7 @@ function createPlatforms(_this) {
   platforms.create(600, 475, 'ground');
   platforms.create(500, 200, 'ground');
   platforms.create(300, 100, 'ground');
-  return platforms
+  return platforms;
 }
 
 function create() {
@@ -61,7 +61,7 @@ function create() {
     
   let font = new FontFaceObserver('Planes_ValMore');
   scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
-  levelText = this.add.text(16, 40, 'Level: 1', { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
+  levelText = this.add.text(16, 40, `Level: ${level}`, { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
 
   font.load().then(() => {
     // game over text
@@ -83,15 +83,23 @@ function create() {
   cursors = setupCursors(this);
 
   // place the platforms
-  createPlatforms(this);
+  platforms = createPlatforms(this);
 
   // player
   player = createPlayer(this, 'pinky', canvasWidth/2, 450);
 
   // coins
-  createCoins(this, platforms, player, canvasWidth, initialNumberOfCoins, score, scoreText);
+  createCoins(this, platforms, player, canvasWidth, initialNumberOfCoins, score, scoreText, null, 0);
   createCoins(this, platforms, player, canvasWidth, 1, score, scoreText, 600, 260);
-  createSingleCoin(this, platforms, player, canvasWidth, 1, score, scoreText, canvasWidth - 10, canvasHeight - 40);
+  createSingleCoin({
+    _this: this,
+    platforms: platforms,
+    player: player,
+    score,
+    scoreText,
+    xposition: canvasWidth - 10,
+    yPosition: canvasHeight - 40,
+  });
 
   // place the trees
   trees = this.physics.add.staticGroup();
@@ -106,7 +114,7 @@ function create() {
   this.physics.add.collider(trees, platforms);
 
   // create enemies
-  enemies = createEnemies(this, platforms, gravity, [0]);
+  enemies = createEnemies(this, platforms, gravity, [0], 100, 'enemy',  'random');
   colliderPlayerPlatform = this.physics.add.collider(player, platforms);
 
   // player overlap with enemy
@@ -128,8 +136,8 @@ function update() {
     winner = false;
     score.value = 0;
     setTimeout(() => {
-      this.scene.stop('level1');
-      this.scene.start('level2');
+      this.scene.stop(`level${level}`);
+      this.scene.start(`level${level + 1}`);
     }, 2000);
     enemies.clear(true, true);
     return;
@@ -141,7 +149,7 @@ function update() {
 };
 
 export default {
-  key: 'level1',
+  key: `level${level}`,
   preload,
   create,
   update,

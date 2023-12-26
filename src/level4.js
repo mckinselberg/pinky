@@ -1,59 +1,66 @@
-import createEnemies from './createEnemies.js';
-import createGameOverText from './createGameOverText.js';
-import createOverlapPlayerEnemies from './createOverlapPlayerEnemies.js';
-import createPlayer from './createPlayer.js';
-import createResetButton from './createResetButton.js';
-import { createSingleCoin } from './createCoins.js';
-import createSuccessText from './createSuccessText.js';
 import constants from './constants.js';
 import enemy from './assets/sprites/enemy.png';
+import enemy2 from './assets/sprites/enemy2.png';
 import FontFaceObserver from 'fontfaceobserver';
-import handleEnemies from './handleEnemies.js';
-import handlePlayer from './handlePlayer.js';
-import handleplayerIsHiding from './handleplayerIsHiding.js';
 import setupCursors from './setupCursors.js';
-import background4 from './assets/bg4.png';
+import createPlayer from './createPlayer.js';
+import handlePlayer from './handlePlayer.js';
+import createEnemies from './createEnemies.js';
+import { createSingleCoin, createBonusCoin } from './createCoins.js';
+import createResetButton from './createResetButton.js';
+import createOverlapPlayerEnemies from './createOverlapPlayerEnemies.js';
+import createGameOverText from './createGameOverText.js';
+import createSuccessText from './createSuccessText.js';
+import handleEnemies from './handleEnemies.js';
+import background3 from './assets/bg3.png';
+import bonusCoinImg from './assets/sprites/bonus-coin.png';
 
 const { canvasWidth, canvasHeight, gravity, playerVelocity } = constants;
 
-let 
-coinsToWin = initialNumberOfCoins,
-colliderPlayerPlatform,
-cursors,
-enemies,
-gameOver = { value: false },
-gameOverText,
-initialNumberOfCoins = 8,
-platforms,
-player,
-playerIsHiding = { value: false },
-playerIsInvincible = { value: false },
-score = { value: 0 },
-scoreText,
-successText,
-trees,
-winner = false;
-    
+let player,
+    playerIsHiding = { value: false },
+    playerIsInvincible = { 
+      value: false,
+      powerUpActive: false,
+      powerUpMessage: '🔽 hide from blue guys.'
+    },
+    trees,
+    colliderPlayerPlatform,
+    enemies,
+    enemies2,
+    platforms,
+    cursors,
+    score = { value: 0 },
+    initialNumberOfCoins = 3,
+    coinsToWin = initialNumberOfCoins + 1,
+    winner = false,
+    scoreText,
+    gameOver = { value: false },
+    gameOverText,
+    successText,
+    levelText,
+    enemyVelocity = 200,
+    bonusCoin,
+    level = 4;
+
 function preload () {
   this.cameras.main.setBackgroundColor('#6bb6ff');
-  this.load.image('background4', background4);
-  this.load.spritesheet(
-    'enemy',
-    enemy,
-    { frameWidth: 32, frameHeight: 32 }
-  );
+  this.load.image('background3', background3);
+  this.load.spritesheet('enemy', enemy, { frameWidth: 32, frameHeight: 32 });
+  this.load.spritesheet('enemy2', enemy2, { frameWidth: 32, frameHeight: 32 });
+  this.load.spritesheet('bonusCoin', bonusCoinImg, { frameWidth: 20, frameHeight: 23 });
 };
 
+// platforms
 function createPlatforms(_this) {
-  // platforms
   platforms = _this.physics.add.staticGroup();
-  // for (let i = 0; i < 10; i++) {
-  //   platforms.create(canvasWidth + (i * 15), 60 * i + 20, 'ground').setScale(.5*i,1).refreshBody();
-  // }
-  platforms.create(canvasWidth/2, canvasHeight - 10, 'ground').setScale(1.8,1).refreshBody();
+  for (let i = 2; i < 6; i++) {
+    platforms.create(canvasWidth + (i * 15), 60 * i + 20, 'ground').setScale(.5*i,1).refreshBody();
+  }
   return platforms;
 }
 
+// trees
 function createTrees(_this, platforms = null) {
   const trees = _this.physics.add.staticGroup();
 
@@ -69,17 +76,19 @@ function createTrees(_this, platforms = null) {
 }
 
 function create() {
-  this.add.image(400, 400, 'background4').setScale(.55, .75);
+  this.add.image(400, 400, 'background3').setScale(.75);;
   gameOver.value = false;
   winner = false;
-  
+
   let font = new FontFaceObserver('Planes_ValMore');
   scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
+  levelText = this.add.text(16, 40, `Level: ${level}`, { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
   
   font.load().then(() => {
     // game over text
     gameOverText = createGameOverText(this);
     scoreText.setFont({ fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
+    levelText.setFont({ fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
     // score
   }).catch((error) => {
     console.error(error);
@@ -92,31 +101,30 @@ function create() {
   platforms = createPlatforms(this);
   
   // create enemies
-  enemies = createEnemies(this, platforms, gravity);
+  enemies  = createEnemies(this, platforms, gravity, [3], enemyVelocity, 'enemy',  'left');
+  enemies2 = createEnemies(this, platforms, gravity, [3], 100,           'enemy2', 'right');
   
-  // for (let i = 0; i < initialNumberOfCoins; i++) {
-  //   createSingleCoin(this, platforms, player, canvasWidth, 1, score, scoreText, (canvasWidth - i * 12) - 60, 60 * i + 65);
-  // }
-
+  // trees
+  trees = createTrees(this);
+  
   // player
   player = createPlayer(this, 'pinky', canvasWidth/2, 10);
   colliderPlayerPlatform = this.physics.add.collider(player, platforms);
 
-  // trees
-  // trees = createTrees(this);
-  
-
-  
+  for (let i = 0; i < initialNumberOfCoins; i++) {
+    i !== 3 && createSingleCoin({_this: this, platforms: platforms, player: player, score: score, scoreText: scoreText, xPosition: (canvasWidth - i * 12) - 60, yPosition: 60 * i + 65});
+  }
+  bonusCoin = createBonusCoin(this, platforms, player, canvasWidth, 1, score, scoreText, canvasWidth - 100, 60 * 3 + 65, playerIsInvincible);
   // player overlap with enemy
-  createOverlapPlayerEnemies(this, player, enemies, colliderPlayerPlatform, playerIsHiding, gameOver, winner);
+  createOverlapPlayerEnemies(this, player, enemies,  colliderPlayerPlatform, playerIsHiding, gameOver, winner, playerIsInvincible);
+  createOverlapPlayerEnemies(this, player, enemies2, colliderPlayerPlatform, playerIsHiding, gameOver, winner, { value: false });
 
   // reset button
-  createResetButton(this, score);
+  createResetButton(this, score, playerIsInvincible);
   
   // success text
   successText = createSuccessText(this);
 };
-
 
 const update = function update() {
   if (player.y + player.height > canvasHeight) {
@@ -137,19 +145,23 @@ const update = function update() {
     winner = false;
     score.value = 0;
     setTimeout(() => {
-      this.scene.stop('level4');
+      this.scene.stop(`level${level}`);
+      this.scene.start(`level${level + 1}`);
     }, 2000);
-    // enemies.clear(true, true);
+    enemies.clear(true, true);
+    enemies2.clear(true, true);
     return;
   }
 
-  handleplayerIsHiding(this, player, trees, playerIsHiding);
-  handlePlayer(this, cursors, player, playerVelocity, playerIsHiding, playerIsInvincible);
-  handleEnemies(this, enemies);
+
+
+  handlePlayer(this, cursors, player, playerVelocity, { value: false }, playerIsInvincible);
+  handleEnemies(this, enemies, 'enemy', enemyVelocity);
+  handleEnemies(this, enemies2, 'enemy2', enemyVelocity);
 };
 
 export default {
-  key: 'level4',
+  key: `level${level}`,
   preload,
   create,
   update,
