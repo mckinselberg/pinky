@@ -108,7 +108,7 @@ function update() {
       this.scene.start('level1');
     }, 2000);
   }
-  this.scene.start('level1');
+  this.scene.start('level5');
 }
 
 

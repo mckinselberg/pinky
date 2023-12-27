@@ -216,6 +216,7 @@ const update = function update() {
   if (enemies2.countActive() === 0 && !finalCoinDropped) {
     createSingleCoin({
       _this: this,
+      coinsToWin: coinsToWin,
       platforms: platforms,
       player: player,
       score: score,
