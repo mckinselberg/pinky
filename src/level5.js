@@ -18,7 +18,7 @@ import background4 from './assets/bg4.png';
 import bonusCoinImg from './assets/sprites/bonus-coin.png';
 import fireballImg from './assets/fireball.png';
 
-const { canvasWidth, canvasHeight, gravity, playerVelocity } = constants;
+const { canvasWidth, canvasHeight, gravity, playerVelocity, enemyPositions } = constants;
 
 let 
 colliderPlayerPlatform,
@@ -30,12 +30,10 @@ fireBalls,
 gameOver = { value: false },
 gameOverText,
 coinsToWin = 3,
-bonusCoinInvincibility,
-bonusCoinFireballs,
 platforms,
 player,
 playerIsHiding = { value: false },
-playerIsInvincible = { 
+playerHasInvincibility = { 
   value: false,
   powerUpActive: false,
   powerUpMessage: '🔽 hide from aliens'
@@ -93,7 +91,7 @@ function create() {
   winner = false;
   
   let font = new FontFaceObserver('Planes_ValMore');
-  scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
+  scoreText = this.add.text(16, 16, `Score: 0 / ${coinsToWin}`, { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
   levelText = this.add.text(16, 40, `Level: ${level}`, { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
   
   font.load().then(() => {
@@ -112,25 +110,57 @@ function create() {
   platforms = createPlatforms(this);
   
   // create enemies
-  enemies  = createEnemies(this, platforms, gravity, [2], enemyVelocity, 'enemy',  'random');
-  enemies2 = createEnemies(this, platforms, gravity, [2], 100,           'enemy2', 'right');
-  
-  // for (let i = 0; i < initialNumberOfCoins; i++) {
-  //   createSingleCoin(this, platforms, player, canvasWidth, 1, score, scoreText, (canvasWidth - i * 12) - 60, 60 * i + 65);
-  // }
+  enemies = createEnemies({
+    _this: this,
+    enemySprite: 'enemy',
+    gravity: gravity,
+    platforms: platforms,
+    position: enemyPositions.RANDOM,
+    removeNthEnemies: [2],
+    velocity: enemyVelocity,
+  });
+  enemies2 = createEnemies({
+    _this: this,
+    enemySprite: 'enemy2',
+    gravity: gravity,
+    removeNthEnemies: [2],
+    platforms: platforms,
+    position: enemyPositions.RIGHT,
+    velocity: 100,
+  });
 
   // player
   player = createPlayer(this, 'pinky', canvasWidth/2, 10);
   colliderPlayerPlatform = this.physics.add.collider(player, platforms);
 
   // invincibility
-  bonusCoinInvincibility = createBonusCoin(this, platforms, player, canvasWidth, 1, score, scoreText, canvasWidth - 160, 60 * 5 + 65, playerIsInvincible);
+  createBonusCoin({
+    _this: this,
+    coinsToWin: coinsToWin,
+    platforms: platforms,
+    player: player,
+    powerUp: playerHasInvincibility,
+    score: score,
+    scoreText: scoreText,
+    xPosition: canvasWidth - 160,
+    yPosition: 60 * 5 + 65,
+  })
 
   // fireballs
-  bonusCoinFireballs     = createBonusCoin(this, platforms, player, canvasWidth, 1, score, scoreText, 160,                60 * 7 + 65, playerHasFireballs);
+  createBonusCoin({
+    _this: this,
+    coinsToWin: coinsToWin,
+    platforms: platforms,
+    player: player,
+    powerUp: playerHasFireballs,
+    score: score,
+    scoreText: scoreText,
+    xPosition: 160,
+    yPosition: 60 * 7 + 65,
+  });
 
   // player overlap with enemy
-  createOverlapPlayerEnemies(this, player, enemies,  colliderPlayerPlatform, playerIsHiding, gameOver, winner, playerIsInvincible);
+  createOverlapPlayerEnemies(this, player, enemies,  colliderPlayerPlatform, playerIsHiding, gameOver, winner, playerHasInvincibility);
   createOverlapPlayerEnemies(this, player, enemies2, colliderPlayerPlatform, playerIsHiding, gameOver, winner);
 
   // fireballs
@@ -144,7 +174,7 @@ function create() {
   });
   
   // reset button
-  createResetButton(this, score, playerIsInvincible, playerHasFireballs);
+  createResetButton({ _this: this, score, playerHasInvincibility, playerHasFireballs });
   
   // success text
   successText = createSuccessText(this);
@@ -179,7 +209,7 @@ const update = function update() {
   }
 
   handleplayerIsHiding(this, player, trees, playerIsHiding);
-  handlePlayer(this, cursors, player, playerVelocity, playerIsHiding, playerIsInvincible);
+  handlePlayer({_this: this, cursors, player,velocity: playerVelocity, playerIsHiding, playerHasInvincibility});
   handleEnemies(this, enemies, 'enemy',  enemyVelocity);
   handleEnemies(this, enemies2, 'enemy2', 100);
 

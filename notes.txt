@@ -1,0 +1,6 @@
+notes on changes:
+renamed invincibility variables
+revised coin functions to accept object parameter
+revised animation creation for coins and player
+revised constants to include enemy movements
+revised creation of animations

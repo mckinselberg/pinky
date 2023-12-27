@@ -9,11 +9,13 @@ import handlePlayer from './handlePlayer.js';
 import setupCursors from './setupCursors.js';
 import setupWASD from './setupWASD.js';
 import createCoins from './createCoins.js';
-import createResetButton from './createResetButton.js';
+// import createResetButton from './createResetButton.js';
 import background from './assets/bg2.png';
 import jumpMp3 from './assets/sounds/jump.mp3';
 import coinCollectMp3 from './assets/sounds/coin-collect.mp3';
 import deathMp3 from './assets/sounds/glitch-bass-101008.mp3';
+import createPlayerAnimations from './createPlayerAnimations.js';
+import createBonusCoinBlinkAnimation from './createBonusCoinBlinkAnimation.js';
 
 const { canvasWidth, canvasHeight, playerVelocity } = constants;
 
@@ -71,14 +73,30 @@ function create() {
   
   // player
   player = createPlayer(this, 'pinky');
+  createPlayerAnimations({_this: this, playerName: 'pinky'});
 
-  createCoins(this, platforms, player, canvasWidth, initialNumberOfCoins, score, scoreText, canvasWidth / 2, 0);
+  // coins
+  createCoins({
+    _this: this,
+    platforms,
+    player,
+    numberOfCoins: initialNumberOfCoins,
+    score,
+    scoreText,
+    xPosition: canvasWidth / 2,
+    yPosition: 0,
+  });
   
   this.add.image(400, canvasHeight, 'tree');
 }
 
 function update() {
-  handlePlayer(this, cursors, player, playerVelocity);
+  handlePlayer({
+    _this: this,
+    cursors,
+    player,
+    velocity: playerVelocity,
+  });
   if (score.value === coinsToWin) {
     winner = true;
   }
@@ -90,7 +108,7 @@ function update() {
       this.scene.start('level1');
     }, 2000);
   }
-  this.scene.start('level5');
+  this.scene.start('level1');
 }
 
 

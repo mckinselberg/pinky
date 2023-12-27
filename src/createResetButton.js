@@ -1,8 +1,9 @@
-function createResetButton(_this, score, playerIsInvincible = {}, playerHasFireballs = {}) {
+function createResetButton({ _this, score, playerHasInvincibility = {}, playerHasFireballs = {} }) {
   const resetActions =  () => {
-    playerIsInvincible.value = false;
-    playerIsInvincible.powerUpActive = false;
     playerHasFireballs.value = false;
+    playerHasFireballs.powerUpActive = false;
+    playerHasInvincibility.value = false;
+    playerHasInvincibility.powerUpActive = false;
     _this.scene.restart();
   }
   const resetButton = _this.add.text(700, 16, 'Reset', { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });

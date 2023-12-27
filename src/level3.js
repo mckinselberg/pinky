@@ -14,13 +14,14 @@ import createSuccessText from './createSuccessText.js';
 import handleEnemies from './handleEnemies.js';
 import background3 from './assets/bg3.png';
 import bonusCoinImg from './assets/sprites/bonus-coin.png';
+import createBonusCoinBlinkAnimation from './createBonusCoinBlinkAnimation.js';
 // import random from './random.js';
 
-const { canvasWidth, canvasHeight, gravity, playerVelocity } = constants;
+const { canvasWidth, canvasHeight, gravity, playerVelocity, enemyPositions } = constants;
 
 let player,
     playerIsHiding = { value: false },
-    playerIsInvincible = { 
+    playerHasInvincibility = { 
       value: false,
       powerUpActive: false,
       powerUpMessage: '🔽 hide from blue guys.'
@@ -96,7 +97,7 @@ function create() {
   enemyVelocity = 200;
 
   let font = new FontFaceObserver('Planes_ValMore');
-  scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
+  scoreText = this.add.text(16, 16, `Score: 0 / ${coinsToWin}`, { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
   levelText = this.add.text(16, 40, `Level: ${level}`, { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
   
   font.load().then(() => {
@@ -116,8 +117,24 @@ function create() {
   platforms = createPlatforms(this);
   
   // create enemies
-  enemies  = createEnemies(this, platforms, gravity, [1], enemyVelocity, 'enemy', 'left');
-  enemies2 = createEnemies(this, platforms, gravity, [1], 100, 'enemy2', 'right');
+  enemies = createEnemies({
+    _this: this,
+    enemySprite: 'enemy',
+    enemyVelocity: enemyVelocity,
+    gravity: gravity,
+    platforms: platforms,
+    position: enemyPositions.LEFT,
+    removeNthEnemies: [1],
+  });
+  enemies2 = createEnemies({
+    _this: this,
+    enemySprite: 'enemy2',
+    enemyVelocity: 100,
+    gravity: gravity,
+    platforms: platforms,
+    position: enemyPositions.RIGHT,
+    removeNthEnemies: [1],
+  });
   
   // trees
   trees = createTrees(this);
@@ -137,20 +154,26 @@ function create() {
       yPosition: 60 * i + 200
     });
   }
-  
-  this.anims.create({
-    key: 'bonusCoinBlink',
-    frames: this.anims.generateFrameNumbers('bonusCoin', { start: 0, end: 1 }),
-    frameRate: 5,
-    repeat: -1
+
+  // invincibility
+  bonusCoin = createBonusCoin({
+    _this: this,
+    platforms: platforms,
+    player: player,
+    score: score,
+    scoreText: scoreText,
+    xPosition: canvasWidth - 60,
+    yPosition: 60 * 3 + 65,
+    powerUp: playerHasInvincibility,
+    coinsToWin: coinsToWin
   });
-  bonusCoin = createBonusCoin(this, platforms, player, canvasWidth, 1, score, scoreText, canvasWidth - 60, 60 * 3 + 65, playerIsInvincible);
+
   // player overlap with enemy
-  createOverlapPlayerEnemies(this, player, enemies,  colliderPlayerPlatform, playerIsHiding, gameOver, winner, playerIsInvincible);
+  createOverlapPlayerEnemies(this, player, enemies,  colliderPlayerPlatform, playerIsHiding, gameOver, winner, playerHasInvincibility);
   createOverlapPlayerEnemies(this, player, enemies2, colliderPlayerPlatform, playerIsHiding, gameOver, winner, { value: false });
 
   // reset button
-  createResetButton(this, score, playerIsInvincible);
+  createResetButton({ _this: this, score, playerHasInvincibility });
   
   // success text
   successText = createSuccessText(this);
@@ -184,7 +207,7 @@ const update = function update() {
   }
 
 
-  handlePlayer(this, cursors, player, playerVelocity, { value: false }, playerIsInvincible);
+  handlePlayer({_this: this, cursors, player, velocity: playerVelocity, playerHasInvincibility});
   handleEnemies(this, enemies, 'enemy', enemyVelocity);
   handleEnemies(this, enemies2, 'enemy2');
 };

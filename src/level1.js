@@ -15,7 +15,7 @@ import createGameOverText from './createGameOverText.js';
 import createSuccessText from './createSuccessText.js';
 import handleEnemies from './handleEnemies.js';
 
-const { canvasWidth, canvasHeight, gravity, playerVelocity } = constants;
+const { canvasWidth, canvasHeight, gravity, playerVelocity, enemyPositions } = constants;
 
 let player,
     playerIsHiding = { value: false, cursorIsDown: false },
@@ -25,7 +25,7 @@ let player,
     platforms,
     cursors,
     initialNumberOfCoins = 6,
-    coinsToWin =  initialNumberOfCoins + 1,
+    coinsToWin =  initialNumberOfCoins + 2,
     score = { value: 0 },
     scoreText,
     gameOver = { value: false },
@@ -60,7 +60,7 @@ function create() {
   this.add.image(400, 400, 'background2').setScale(.55, .75);
     
   let font = new FontFaceObserver('Planes_ValMore');
-  scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
+  scoreText = this.add.text(16, 16, `Score: 0 / ${coinsToWin}`, { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
   levelText = this.add.text(16, 40, `Level: ${level}`, { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
 
   font.load().then(() => {
@@ -74,7 +74,7 @@ function create() {
   });
 
   // reset button
-  createResetButton(this, score);
+  createResetButton({ _this: this, score });
 
   // success text
   successText = createSuccessText(this);
@@ -89,8 +89,27 @@ function create() {
   player = createPlayer(this, 'pinky', canvasWidth/2, 450);
 
   // coins
-  createCoins(this, platforms, player, canvasWidth, initialNumberOfCoins, score, scoreText, null, 0);
-  createCoins(this, platforms, player, canvasWidth, 1, score, scoreText, 600, 260);
+  createCoins({
+    _this: this,
+    platforms,
+    player,
+    numberOfCoins: initialNumberOfCoins,
+    score,
+    scoreText,
+    yPosition: 0,
+    coinsToWin,
+  });
+  createCoins({
+    _this: this,
+    platforms: platforms,
+    player: player,
+    numberOfCoins: 1,
+    score,
+    scoreText,
+    xPosition: 600,
+    yPosition: 260,
+    coinsToWin,
+  })
   createSingleCoin({
     _this: this,
     platforms: platforms,
@@ -99,6 +118,7 @@ function create() {
     scoreText,
     xposition: canvasWidth - 10,
     yPosition: canvasHeight - 40,
+    coinsToWin,
   });
 
   // place the trees
@@ -114,7 +134,15 @@ function create() {
   this.physics.add.collider(trees, platforms);
 
   // create enemies
-  enemies = createEnemies(this, platforms, gravity, [0], 100, 'enemy',  'random');
+  enemies = createEnemies({
+    _this: this,
+    platforms: platforms,
+    gravity: gravity,
+    removeNthEnemies: [0],
+    enemyVelocity: 100,
+    enemySprite: 'enemy',
+    position: enemyPositions.RANDOM,
+  });
   colliderPlayerPlatform = this.physics.add.collider(player, platforms);
 
   // player overlap with enemy
@@ -143,7 +171,7 @@ function update() {
     return;
   }
 
-  handlePlayer(this, cursors, player, playerVelocity);
+  handlePlayer({_this: this, cursors, player, velocity: playerVelocity});
   handleplayerIsHiding(this, player, trees, playerIsHiding);
   handleEnemies(this, enemies, undefined, playerVelocity - 30);
 };

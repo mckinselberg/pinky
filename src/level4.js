@@ -15,11 +15,11 @@ import handleEnemies from './handleEnemies.js';
 import background3 from './assets/bg3.png';
 import bonusCoinImg from './assets/sprites/bonus-coin.png';
 
-const { canvasWidth, canvasHeight, gravity, playerVelocity } = constants;
+const { canvasWidth, canvasHeight, gravity, playerVelocity, enemyPositions } = constants;
 
 let player,
     playerIsHiding = { value: false },
-    playerIsInvincible = { 
+    playerHasInvincibility = { 
       value: false,
       powerUpActive: false,
       powerUpMessage: '🔽 hide from blue guys.'
@@ -81,7 +81,7 @@ function create() {
   winner = false;
 
   let font = new FontFaceObserver('Planes_ValMore');
-  scoreText = this.add.text(16, 16, 'Score: 0', { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
+  scoreText = this.add.text(16, 16, `Score: 0 / ${coinsToWin}`, { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
   levelText = this.add.text(16, 40, `Level: ${level}`, { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
   
   font.load().then(() => {
@@ -101,8 +101,24 @@ function create() {
   platforms = createPlatforms(this);
   
   // create enemies
-  enemies  = createEnemies(this, platforms, gravity, [3], enemyVelocity, 'enemy',  'left');
-  enemies2 = createEnemies(this, platforms, gravity, [3], 100,           'enemy2', 'right');
+  enemies = createEnemies({
+    _this: this,
+    enemySprite: 'enemy',
+    gravity: gravity,
+    platforms: platforms,
+    position: enemyPositions.LEFT,
+    removeNthEnemies: [3],
+    velocity: enemyVelocity,
+  });
+  enemies2 = createEnemies({
+    _this: this,
+    enemySprite: 'enemy2',
+    gravity: gravity,
+    platforms: platforms,
+    position: enemyPositions.RIGHT,
+    removeNthEnemies: [3],
+    velocity: enemyVelocity,
+  });
   
   // trees
   trees = createTrees(this);
@@ -112,15 +128,35 @@ function create() {
   colliderPlayerPlatform = this.physics.add.collider(player, platforms);
 
   for (let i = 0; i < initialNumberOfCoins; i++) {
-    i !== 3 && createSingleCoin({_this: this, platforms: platforms, player: player, score: score, scoreText: scoreText, xPosition: (canvasWidth - i * 12) - 60, yPosition: 60 * i + 65});
+    i !== 3 && createSingleCoin({
+      _this: this,
+      platforms: platforms,
+      player: player,
+      score: score,
+      scoreText: scoreText,
+      xPosition: (canvasWidth - i * 12) - 60,
+      yPosition: 60 * i + 65,
+      coinsToWin: coinsToWin,
+    });
   }
-  bonusCoin = createBonusCoin(this, platforms, player, canvasWidth, 1, score, scoreText, canvasWidth - 100, 60 * 3 + 65, playerIsInvincible);
+  bonusCoin = createBonusCoin({
+    _this: this,
+    coinsToWin: coinsToWin,
+    platforms: platforms,
+    powerUp: playerHasInvincibility,
+    player: player,
+    score: score,
+    scoreText: scoreText,
+    xPosition: canvasWidth - 100,
+    yPosition: 60 * 3 + 65,
+  });
+
   // player overlap with enemy
-  createOverlapPlayerEnemies(this, player, enemies,  colliderPlayerPlatform, playerIsHiding, gameOver, winner, playerIsInvincible);
+  createOverlapPlayerEnemies(this, player, enemies,  colliderPlayerPlatform, playerIsHiding, gameOver, winner, playerHasInvincibility);
   createOverlapPlayerEnemies(this, player, enemies2, colliderPlayerPlatform, playerIsHiding, gameOver, winner, { value: false });
 
   // reset button
-  createResetButton(this, score, playerIsInvincible);
+  createResetButton({ _this: this, score, playerHasInvincibility });
   
   // success text
   successText = createSuccessText(this);
@@ -153,9 +189,7 @@ const update = function update() {
     return;
   }
 
-
-
-  handlePlayer(this, cursors, player, playerVelocity, { value: false }, playerIsInvincible);
+  handlePlayer({_this: this, cursors, player, velocity: playerVelocity, playerHasInvincibility});
   handleEnemies(this, enemies, 'enemy', enemyVelocity);
   handleEnemies(this, enemies2, 'enemy2', enemyVelocity);
 };

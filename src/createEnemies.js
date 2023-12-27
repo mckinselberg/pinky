@@ -1,29 +1,30 @@
 import random from "./random";
 
-function createEnemies(
+function createEnemies({
   _this,
-  platforms,
-  gravity,
-  removeNthEnemies = [],
-  enemyVelocity = 300,
   enemySprite = 'enemy',
-  position = 'random'
-) {
+  enemyVelocity = 300,
+  gravity,
+  platforms,
+  position = 'random',
+  removeNthEnemies = [],
+}) {
   const enemies = _this.physics.add.group();
   const platformEnds = _this.physics.add.group();
   platforms.children.iterate(function (platform, i) {
     if (removeNthEnemies.includes(i)) return;
     let enemyPosition; 
     switch (position) {
-      case 'random':
-        enemyPosition = random(platform.x - platform.displayWidth / 2 + 50, platform.x + platform.displayWidth / 2 - 50);
-        break;
       case 'left':
         enemyPosition = platform.x - platform.displayWidth / 2 + 50;
         break;
       case 'right':
         enemyPosition = platform.x + platform.displayWidth / 2 - 50;
         break;
+        case 'random':
+        default:
+          enemyPosition = random(platform.x - platform.displayWidth / 2 + 50, platform.x + platform.displayWidth / 2 - 50);
+          break;
     }
     const enemy = _this.physics.add.sprite(
       enemyPosition,
@@ -63,8 +64,10 @@ function createEnemies(
     enemy.setCollideWorldBounds(true);
     enemy.body.setGravityY(gravity);
     _this.physics.add.collider(enemy, platforms);
-  }, this);  // enemy animations
-  _this.anims.create({
+  }, this);
+  
+  // enemy animations
+  !_this.anims.exists( `${enemySprite}Move`) && _this.anims.create({
     key: `${enemySprite}Move`,
     frames: _this.anims.generateFrameNumbers(enemySprite, { start: 0, end: 1 }),
     frameRate: 10,

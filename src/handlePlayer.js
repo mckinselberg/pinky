@@ -18,7 +18,15 @@ function isBlockedDown(player) {
   return player.body.blocked.down;
 }
 
-function handlePlayer(_this, cursors, player, velocity, playerIsHiding, playerIsInvincible = { value: false, powerUpActive: false }) {
+function handlePlayer({
+  _this,
+  cursors,
+  player,
+  velocity,
+  playerIsHiding = { value: false, powerUpActive: false  },
+  playerHasFireballs = { value: false, powerUpActive: false },
+  playerHasInvincibility = { value: false, powerUpActive: false },
+}) {
   const playerIsJumping = isJumping(player);
   const playerIsFalling = isFalling(player);
   const playerIsTouchingWorldBounds = isTouchingWorldBounds(player);
@@ -85,12 +93,12 @@ function handlePlayer(_this, cursors, player, velocity, playerIsHiding, playerIs
   }
 
   // duck
-  if (cursors.down.isDown && !playerIsJumping && playerIsInvincible.powerUpActive) {
+  if (cursors.down.isDown && !playerIsJumping && playerHasInvincibility.powerUpActive) {
     player.anims.play('hide', true);
-    playerIsInvincible.value = true;
+    playerHasInvincibility.value = true;
     player.setVelocityX(0);
   } else if (cursors.down.isUp) {
-    playerIsInvincible.value = false;
+    playerHasInvincibility.value = false;
   }
 
   // const overlap = _this.physics.overlap(player, trees);
