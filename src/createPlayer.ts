@@ -1,8 +1,8 @@
 import constants from './constants';
 
-const { gravity, canvasWidth } = constants;
+const { gravity } = constants;
 
-function createPlayer(_this, playerName, positionX, positionY) {
+function createPlayer(_this: Phaser.Scene, playerName: string, positionX: number, positionY: number) {
   const player = _this.physics.add.sprite(positionX, positionY, playerName);
   player.setBounce(0.1);
   player.setCollideWorldBounds(true);

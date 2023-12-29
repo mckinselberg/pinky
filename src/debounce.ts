@@ -1,6 +1,6 @@
-export default function debounce(fn, delay) {
+export default function debounce(fn: Function, delay: number) {
 
-  let timer = null;
+  let timer: any = null;
 
   return function () {
     if (timer) {

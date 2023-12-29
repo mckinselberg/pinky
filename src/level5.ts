@@ -1,37 +1,39 @@
-import createEnemies from './createEnemies.js';
-import createFireBalls from './createFireBalls.js';
-import createGameOverText from './createGameOverText.js';
-import createOverlapPlayerEnemies from './createOverlapPlayerEnemies.js';
-import createPlayer from './createPlayer.js';
-import createResetButton from './createResetButton.js';
-import { createBonusCoin, createSingleCoin } from './createCoins.js';
-import createSuccessText from './createSuccessText.js';
-import constants from './constants.js';
+import createEnemies from './createEnemies';
+import createFireBalls from './createFireBalls';
+import createGameOverText from './createGameOverText';
+import createOverlapPlayerEnemies from './createOverlapPlayerEnemies';
+import createPlayer from './createPlayer';
+import createResetButton from './createResetButton';
+import { createBonusCoin, createSingleCoin } from './createCoins';
+import createSuccessText from './createSuccessText';
+import constants from './constants';
 import enemy from './assets/sprites/enemy.png';
 import enemy2 from './assets/sprites/enemy2.png';
 import FontFaceObserver from 'fontfaceobserver';
-import handleEnemies from './handleEnemies.js';
-import handlePlayer from './handlePlayer.js';
-import handleplayerIsHiding from './handleplayerIsHiding.js';
-import setupCursors from './setupCursors.js';
+import handleEnemies from './handleEnemies';
+import handlePlayer from './handlePlayer';
+import handleplayerIsHiding from './handleplayerIsHiding';
+import setupCursors from './setupCursors';
 import background4 from './assets/bg4.png';
 import bonusCoinImg from './assets/sprites/bonus-coin.png';
 import fireballImg from './assets/fireball.png';
+import createScoreText from './createScoreText';
+import createLevelText from './createLevelText';
 
 const { canvasWidth, canvasHeight, gravity, playerVelocity, enemyPositions } = constants;
 
 let 
-colliderPlayerPlatform,
-cursors,
-enemies,
-enemies2,
+colliderPlayerPlatform: Phaser.Physics.Arcade.Collider,
+cursors: Phaser.Types.Input.Keyboard.CursorKeys,
+enemies: Phaser.GameObjects.Group,
+enemies2: Phaser.GameObjects.Group,
 enemyVelocity = 200,
-fireBalls,
+fireBalls: Phaser.GameObjects.Group,
 gameOver = { value: false },
-gameOverText,
+gameOverText: Phaser.GameObjects.Text,
 coinsToWin = 3,
-platforms,
-player,
+platforms: Phaser.GameObjects.Group,
+player: Phaser.Physics.Arcade.Sprite,
 playerIsHiding = { value: false },
 playerHasInvincibility = { 
   value: false,
@@ -44,16 +46,16 @@ playerHasFireballs = {
   powerUpMessage: 'F to shoot to shoot owls'
 },
 score = { value: 0 },
-scoreText,
-successText,
-trees,
+scoreText: Phaser.GameObjects.Text,
+successText: Phaser.GameObjects.Text,
+trees: Phaser.GameObjects.Group,
 winner = false,
 level = 5,
-levelText,
+levelText: Phaser.GameObjects.Text,
 activeEnemies = 0,
 finalCoinDropped = false;
     
-function preload () {
+function preload (this: Phaser.Scene) {
   this.cameras.main.setBackgroundColor('#6bb6ff');
   this.load.image('background4', background4);
   this.load.spritesheet('enemy',  enemy,  { frameWidth: 32, frameHeight: 32 });
@@ -62,7 +64,7 @@ function preload () {
   this.load.image('fireball', fireballImg);
 };
 
-function createPlatforms(_this) {
+function createPlatforms(_this: Phaser.Scene) {
   // platforms
   platforms = _this.physics.add.staticGroup();
   platforms.create(canvasWidth/2, canvasHeight - 10, 'ground').setScale(1.8,1).refreshBody();
@@ -71,40 +73,32 @@ function createPlatforms(_this) {
   return platforms;
 }
 
-function createTrees(_this, platforms = null) {
+function createTrees(_this: Phaser.Scene, platforms = null) {
   const trees = _this.physics.add.staticGroup();
 
   for (let i = 0; i < canvasWidth; i+=canvasWidth/10) {
     trees.create(canvasWidth - i - 40, canvasHeight - 20, 'tree');
   }
-  trees.children.iterate(function(tree, idx) {
-    tree.body.setSize(50, 40);
-    if (idx === 0) tree.setFlipX(true);
-  });
+  // trees.children.iterate(function(tree, idx) {
+  //   tree.body.setSize(50, 40);
+  //   if (idx === 0) tree.setFlipX(true);
+  // });
   platforms && _this.physics.add.collider(trees, platforms);
   return trees;
 }
 
-function create() {
+function create(this: Phaser.Scene) {
   this.add.image(400, 400, 'background4').setScale(.55, .75);
   gameOver.value = false;
   winner = false;
   
   let font = new FontFaceObserver('Planes_ValMore');
-  scoreText = this.add.text(16, 16, `Score: 0 / ${coinsToWin}`, { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
-  levelText = this.add.text(16, 40, `Level: ${level}`, { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
-  
-  font.load().then(() => {
-    // game over text
-    gameOverText = createGameOverText(this);
-    scoreText.setFont({ fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
-    // score
-  }).catch((error) => {
-    console.error(error);
-  });
+  scoreText = createScoreText({ _this: this, coinsToWin });
+  levelText = createLevelText({ _this: this, level });
+  gameOverText = createGameOverText(this);
 
   // set up the cursors
-  cursors = setupCursors(this);
+  cursors = setupCursors(this) as Phaser.Types.Input.Keyboard.CursorKeys;
   
   // place the platforms
   platforms = createPlatforms(this);
@@ -117,7 +111,7 @@ function create() {
     platforms: platforms,
     position: enemyPositions.RANDOM,
     removeNthEnemies: [2],
-    velocity: enemyVelocity,
+    enemyVelocity,
   });
   enemies2 = createEnemies({
     _this: this,
@@ -126,7 +120,7 @@ function create() {
     removeNthEnemies: [2],
     platforms: platforms,
     position: enemyPositions.RIGHT,
-    velocity: 100,
+    enemyVelocity: 100,
   });
 
   // player
@@ -181,7 +175,7 @@ function create() {
 };
 
 
-const update = function update() {
+const update = function update(this: Phaser.Scene) {
   if (player.y + player.height > canvasHeight) {
     gameOver.value = true;
     player.destroy();

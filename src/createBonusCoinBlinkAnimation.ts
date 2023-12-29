@@ -1,4 +1,4 @@
-function createBonusCoinBlinkAnimation(_this) {
+function createBonusCoinBlinkAnimation(_this: Phaser.Scene) {
   !_this.anims.exists('bonusCoinBlink') && _this.anims.create({
     key: 'bonusCoinBlink',
     frames: _this.anims.generateFrameNumbers('bonusCoin', { start: 0, end: 1 }),

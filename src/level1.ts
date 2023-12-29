@@ -1,48 +1,50 @@
-import constants from './constants.js';
+import constants from './constants';
 import enemy from './assets/sprites/enemy.png';
 import enemy2 from './assets/sprites/enemy2.png';
 import background2 from './assets/bg1.png';
 import FontFaceObserver from 'fontfaceobserver';
-import setupCursors from './setupCursors.js';
-import createPlayer from './createPlayer.js';
-import handlePlayer from './handlePlayer.js';
-import createEnemies from './createEnemies.js';
-import { createCoins, createSingleCoin } from './createCoins.js';
-import createResetButton from './createResetButton.js';
-import createOverlapPlayerEnemies from './createOverlapPlayerEnemies.js';
-import handleplayerIsHiding from './handleplayerIsHiding.js';
-import createGameOverText from './createGameOverText.js';
-import createSuccessText from './createSuccessText.js';
-import handleEnemies from './handleEnemies.js';
+import setupCursors from './setupCursors';
+import createPlayer from './createPlayer';
+import handlePlayer from './handlePlayer';
+import createEnemies from './createEnemies';
+import { createCoins, createSingleCoin } from './createCoins';
+import createResetButton from './createResetButton';
+import createOverlapPlayerEnemies from './createOverlapPlayerEnemies';
+import handleplayerIsHiding from './handleplayerIsHiding';
+import createGameOverText from './createGameOverText';
+import createSuccessText from './createSuccessText';
+import createScoreText from './createScoreText';
+import createLevelText from './createLevelText';
+import handleEnemies from './handleEnemies';
 
 const { canvasWidth, canvasHeight, gravity, playerVelocity, enemyPositions } = constants;
 
-let player,
+let player: Phaser.Physics.Arcade.Sprite,
     playerIsHiding = { value: false, cursorIsDown: false },
-    trees,
+    trees: Phaser.Physics.Arcade.StaticGroup,
     colliderPlayerPlatform,
-    enemies,
-    platforms,
-    cursors,
+    enemies: Phaser.Physics.Arcade.Group,
+    platforms: Phaser.Physics.Arcade.StaticGroup,
+    cursors: Phaser.Types.Input.Keyboard.CursorKeys,
     initialNumberOfCoins = 6,
     coinsToWin =  initialNumberOfCoins + 2,
     score = { value: 0 },
-    scoreText,
+    scoreText: Phaser.GameObjects.Text,
     gameOver = { value: false },
-    gameOverText,
-    successText,
+    gameOverText: Phaser.GameObjects.Text,
+    successText: Phaser.GameObjects.Text,
     winner = false,
-    levelText,
+    levelText: Phaser.GameObjects.Text,
     level = 1;
 
-function preload () {
+function preload (this: Phaser.Scene) {
   this.load.image('background2', background2);
   this.cameras.main.setBackgroundColor('#6bb6ff');
   this.load.spritesheet('enemy', enemy, { frameWidth: 32, frameHeight: 32 });
 };
 
 // platforms
-function createPlatforms(_this) {
+function createPlatforms(_this: Phaser.Scene) {
   platforms = _this.physics.add.staticGroup();
   platforms.create(400, 600, 'ground').setScale(2).refreshBody();
   platforms.create(100, 400, 'ground');
@@ -53,25 +55,15 @@ function createPlatforms(_this) {
   return platforms;
 }
 
-function create() {
+function create(this: Phaser.Scene) {
   gameOver.value = false;
   winner = false;
   
   this.add.image(400, 400, 'background2').setScale(.55, .75);
-    
-  let font = new FontFaceObserver('Planes_ValMore');
-  scoreText = this.add.text(16, 16, `Score: 0 / ${coinsToWin}`, { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
-  levelText = this.add.text(16, 40, `Level: ${level}`, { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
 
-  font.load().then(() => {
-    // game over text
-    gameOverText = createGameOverText(this);
-    scoreText.setFont({ fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
-    levelText.setFont({ fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
-    // score
-  }).catch((error) => {
-    console.error(error);
-  });
+  gameOverText = createGameOverText(this);
+  scoreText = createScoreText({ _this: this, coinsToWin });
+  levelText = createLevelText({ _this: this, level });
 
   // reset button
   createResetButton({ _this: this, score });
@@ -80,7 +72,7 @@ function create() {
   successText = createSuccessText(this);
 
   // set up the cursors
-  cursors = setupCursors(this);
+  cursors = setupCursors(this) as Phaser.Types.Input.Keyboard.CursorKeys;
 
   // place the platforms
   platforms = createPlatforms(this);
@@ -116,7 +108,7 @@ function create() {
     player: player,
     score,
     scoreText,
-    xposition: canvasWidth - 10,
+    xPosition: canvasWidth - 10,
     yPosition: canvasHeight - 40,
     coinsToWin,
   });
@@ -126,11 +118,7 @@ function create() {
   trees.create(200, 60, 'tree')
   trees.create(600, 435, 'tree');
   trees.create(400, 160, 'tree');
-  trees.children.iterate(function(tree, idx) {
-    tree.body.setSize(50, 40);
-    if (idx === 0) tree.setFlipX(true);
-  })
-  
+
   this.physics.add.collider(trees, platforms);
 
   // create enemies
@@ -150,7 +138,7 @@ function create() {
 
 };
 
-function update() {
+function update(this: Phaser.Scene) {
   if (gameOver.value) {
     gameOverText.setVisible(true);
     return;

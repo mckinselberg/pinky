@@ -1,4 +1,4 @@
-function createPlayerAnimations({_this, playerName}) {
+function createPlayerAnimations({_this, playerName}: { _this: Phaser.Scene; playerName: string; }) {
   _this.anims.create({
     key: 'left',
     frames: _this.anims.generateFrameNumbers(playerName, { start: 2, end: 3 }),

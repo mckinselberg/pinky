@@ -1,11 +1,11 @@
 function createOverlapPlayerEnemies(
-  _this,
-  player,
-  enemies,
-  colliderPlayerPlatform,
-  playerIsHiding,
-  gameOver,
-  winner,
+  _this: Phaser.Scene,
+  player: Phaser.Physics.Arcade.Sprite,
+  enemies: Phaser.GameObjects.Group,
+  colliderPlayerPlatform: Phaser.Physics.Arcade.Collider,
+  playerIsHiding: { value: boolean },
+  gameOver: { value: boolean },
+  winner: boolean = false,
   playerIsInvincible = { value: false }
 ) {
   _this.physics.add.overlap(player, enemies, function () {

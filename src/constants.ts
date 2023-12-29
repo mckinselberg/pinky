@@ -8,6 +8,9 @@ const constants = {
     RANDOM: 'random',
     LEFT: 'left',
     RIGHT: 'right',
+  },
+  colors: {
+    PINK: '#FFC0CB'
   }
 }
 

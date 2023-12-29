@@ -1,4 +1,4 @@
-import Phaser from "phaser";
+import * as Phaser from "phaser";
 import constants from "./constants";
 import welcome from "./welcome";
 import level1 from "./level1";

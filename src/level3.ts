@@ -1,51 +1,52 @@
-import constants from './constants.js';
+import constants from './constants';
 import enemy from './assets/sprites/enemy.png';
 import enemy2 from './assets/sprites/enemy2.png';
 import FontFaceObserver from 'fontfaceobserver';
-import setupCursors from './setupCursors.js';
-import createPlayer from './createPlayer.js';
-import handlePlayer from './handlePlayer.js';
-import createEnemies from './createEnemies.js';
-import { createSingleCoin, createBonusCoin } from './createCoins.js';
-import createResetButton from './createResetButton.js';
-import createOverlapPlayerEnemies from './createOverlapPlayerEnemies.js';
-import createGameOverText from './createGameOverText.js';
-import createSuccessText from './createSuccessText.js';
-import handleEnemies from './handleEnemies.js';
+import setupCursors from './setupCursors';
+import createPlayer from './createPlayer';
+import handlePlayer from './handlePlayer';
+import createEnemies from './createEnemies';
+import { createSingleCoin, createBonusCoin } from './createCoins';
+import createResetButton from './createResetButton';
+import createOverlapPlayerEnemies from './createOverlapPlayerEnemies';
+import createGameOverText from './createGameOverText';
+import createSuccessText from './createSuccessText';
+import handleEnemies from './handleEnemies';
 import background3 from './assets/bg3.png';
 import bonusCoinImg from './assets/sprites/bonus-coin.png';
-import createBonusCoinBlinkAnimation from './createBonusCoinBlinkAnimation.js';
-// import random from './random.js';
+import createBonusCoinBlinkAnimation from './createBonusCoinBlinkAnimation';
+import createScoreText from './createScoreText';
+import createLevelText from './createLevelText';
 
 const { canvasWidth, canvasHeight, gravity, playerVelocity, enemyPositions } = constants;
 
-let player,
+let player: Phaser.Physics.Arcade.Sprite,
     playerIsHiding = { value: false },
     playerHasInvincibility = { 
       value: false,
       powerUpActive: false,
       powerUpMessage: '🔽 hide from blue guys.'
     },
-    trees,
-    colliderPlayerPlatform,
-    enemies,
-    enemies2,
-    platforms,
-    cursors,
+    trees: Phaser.GameObjects.Group,
+    colliderPlayerPlatform: Phaser.Physics.Arcade.Collider,
+    enemies: Phaser.GameObjects.Group,
+    enemies2: Phaser.GameObjects.Group,
+    platforms: Phaser.GameObjects.Group,
+    cursors: Phaser.Types.Input.Keyboard.CursorKeys,
     score = { value: 0 },
-    initialNumberOfCoins = 6,
-    coinsToWin = initialNumberOfCoins,
-    winner = false,
-    scoreText,
+    initialNumberOfCoins: number = 6,
+    coinsToWin: number = initialNumberOfCoins,
+    winner: boolean = false,
+    scoreText: Phaser.GameObjects.Text,
     gameOver = { value: false },
-    gameOverText,
-    successText,
-    levelText,
-    enemyVelocity,
-    bonusCoin,
+    gameOverText: Phaser.GameObjects.Text,
+    successText: Phaser.GameObjects.Text,
+    levelText: Phaser.GameObjects.Text,
+    enemyVelocity: number,
+    bonusCoin: Phaser.GameObjects.Sprite,
     level = 3;
 
-function preload () {
+function preload (this: Phaser.Scene) {
   this.cameras.main.setBackgroundColor('#6bb6ff');
   this.load.image('background3', background3);
   this.load.spritesheet(
@@ -66,7 +67,7 @@ function preload () {
   );
 };
 
-function createPlatforms(_this) {
+function createPlatforms(_this: Phaser.Scene) {
   // platforms
   platforms = _this.physics.add.staticGroup();
   for (let i = 4; i < 10; i++) {
@@ -75,46 +76,38 @@ function createPlatforms(_this) {
   return platforms;
 }
 
-function createTrees(_this, platforms = null) {
+function createTrees(_this: Phaser.Scene, platforms = null) {
   const trees = _this.physics.add.staticGroup();
 
   for (let i = 0; i < canvasWidth; i+=canvasWidth/10) {
     trees.create(canvasWidth - i - 40, canvasHeight - 20, 'tree');
   }
-  trees.children.iterate(function(tree, idx) {
-    tree.body.setSize(50, 40);
-    if (idx === 0) tree.setFlipX(true);
-  });
+  // trees.children.iterate(function(tree, idx) {
+  //   tree.body.setSize(50, 40);
+  //   if (idx === 0) tree.setFlipX(true);
+  // });
   platforms && _this.physics.add.collider(trees, platforms);
   return trees;
 }
 
-function create() {
+function create(this: Phaser.Scene) {
   this.add.image(400, 400, 'background3').setScale(.75);;
   gameOver.value = false;
   winner = false;
   
   enemyVelocity = 200;
-
-  let font = new FontFaceObserver('Planes_ValMore');
-  scoreText = this.add.text(16, 16, `Score: 0 / ${coinsToWin}`, { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
-  levelText = this.add.text(16, 40, `Level: ${level}`, { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
-  
-  font.load().then(() => {
-    // game over text
-    gameOverText = createGameOverText(this);
-    scoreText.setFont({ fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
-    levelText.setFont({ fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
-    // score
-  }).catch((error) => {
-    console.error(error);
-  });
-
-  // set up the cursors
-  cursors = setupCursors(this);
   
   // place the platforms
   platforms = createPlatforms(this);
+
+  let font = new FontFaceObserver('Planes_ValMore');
+  scoreText = createScoreText({ _this: this, coinsToWin });
+  levelText = createLevelText({ _this: this, level });
+  successText = createSuccessText(this);
+  gameOverText = createGameOverText(this);
+
+  // set up the cursors
+  cursors = setupCursors(this) as Phaser.Types.Input.Keyboard.CursorKeys;
   
   // create enemies
   enemies = createEnemies({
@@ -151,7 +144,8 @@ function create() {
       score: score,
       scoreText: scoreText,
       xPosition: (canvasWidth - i * 12) - 60,
-      yPosition: 60 * i + 200
+      yPosition: 60 * i + 200,
+      coinsToWin: coinsToWin,
     });
   }
 
@@ -179,7 +173,7 @@ function create() {
   successText = createSuccessText(this);
 };
 
-const update = function update() {
+const update = function update(this: Phaser.Scene) {
   if (player.y + player.height > canvasHeight) {
     gameOver.value = true;
     player.destroy();
