@@ -22,7 +22,6 @@ const fireAction = (
     fireball.body.world.on('worldbounds', (body: any) => { // Listen for world bounds event
       if (body.gameObject === fireball) {
         fireball.destroy();
-        console.log(fireballs.getLength());
       }
     }, this);
   }

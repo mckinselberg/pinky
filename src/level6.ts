@@ -52,10 +52,11 @@ let
   successText: Phaser.GameObjects.Text,
   trees: Phaser.Physics.Arcade.StaticGroup,
   winner = false,
-  level = 5,
+  level = 6,
   levelText: Phaser.GameObjects.Text,
   activeEnemies = 0,
-  finalCoinDropped = false;
+  finalCoinDropped = false,
+  timeout: number;
     
 function preload (this: Phaser.Scene) {
   this.cameras.main.setBackgroundColor('#6bb6ff');
@@ -70,8 +71,8 @@ function createPlatforms(_this: Phaser.Scene) {
   // platforms
   platforms = _this.physics.add.staticGroup();
   platforms.create(canvasWidth/2, canvasHeight - 10, 'ground').setScale(1.8,1).refreshBody();
-  // platforms.create(canvasWidth/2 - 10, canvasHeight - 100, 'ground').setScale(1.8,1).refreshBody();
-  // platforms.create(canvasWidth/2, canvasHeight - 200, 'ground').setScale(.5,1).refreshBody();
+  platforms.create(canvasWidth/2 - 10, canvasHeight - 100, 'ground').setScale(1.8,1).refreshBody();
+  platforms.create(canvasWidth/2, canvasHeight - 200, 'ground').setScale(.5,1).refreshBody();
   return platforms;
 }
 
@@ -183,6 +184,7 @@ const update = function update(this: Phaser.Scene) {
     gameOver.value = true;
     player.destroy();
     gameOver.value = true;
+    clearTimeout(timeout);
   }
   if (gameOver.value) {
     gameOverText.setVisible(true);
@@ -198,7 +200,8 @@ const update = function update(this: Phaser.Scene) {
     score.value = 0;
     enemies.clear(true, true);
     enemies2.clear(true, true);
-    setTimeout(() => {
+    // @ts-ignore
+    timeout = setTimeout(() => {
       this.scene.stop(`level${level}`);
       this.scene.start(`level${level + 1}`);
     }, 2000);

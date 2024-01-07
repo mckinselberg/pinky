@@ -3,6 +3,7 @@ import enemy from './assets/sprites/enemy.png';
 import enemy2 from './assets/sprites/enemy2.png';
 // import FontFaceObserver from 'fontfaceobserver';
 import setupCursors from './setupCursors';
+import setupWASD from './setupWASD.js';
 import createPlayer from './createPlayer';
 import handlePlayer from './handlePlayer';
 import createEnemies from './createEnemies';
@@ -30,8 +31,9 @@ let player: Phaser.Physics.Arcade.Sprite,
     colliderPlayerPlatform: Phaser.Physics.Arcade.Collider,
     enemies: Phaser.GameObjects.Group,
     enemies2: Phaser.GameObjects.Group,
-    platforms: Phaser.GameObjects.Group,
+    platforms: Phaser.Physics.Arcade.StaticGroup,
     cursors: Phaser.Types.Input.Keyboard.CursorKeys,
+    wasd: any,
     score = { value: 0 },
     initialNumberOfCoins = 3,
     coinsToWin = initialNumberOfCoins + 1,
@@ -84,6 +86,7 @@ function create(this: Phaser.Scene) {
 
   // set up the cursors
   cursors = setupCursors(this) as Phaser.Types.Input.Keyboard.CursorKeys;
+  wasd = setupWASD(this);
   
   // place the platforms
   platforms = createPlatforms(this);
@@ -193,7 +196,7 @@ const update = function update(this: Phaser.Scene) {
     return;
   }
 
-  handlePlayer({_this: this, cursors, player, velocity: playerVelocity, playerHasInvincibility});
+  handlePlayer({_this: this, cursors, wasd, player, velocity: playerVelocity, playerHasInvincibility});
   handleEnemies(this, enemies, 'enemy', enemyVelocity);
   handleEnemies(this, enemies2, 'enemy2', enemyVelocity);
 };

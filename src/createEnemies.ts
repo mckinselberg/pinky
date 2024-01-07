@@ -16,7 +16,7 @@ function createEnemies(this: any, {
   enemySprite?: string,
   enemyVelocity?: number,
   gravity: number,
-  platforms: any,
+  platforms: Phaser.Physics.Arcade.StaticGroup,
   position?: string,
   removeNthEnemies?: number[]
   }) {

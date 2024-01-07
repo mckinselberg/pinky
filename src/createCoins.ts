@@ -1,7 +1,7 @@
 import constants from "./constants";
 import createBonusCoinBlinkAnimation from "./createBonusCoinBlinkAnimation";
 
-const { canvasWidth } = constants;
+const { canvasWidth, gravity } = constants;
 
 function collectCoin({
   _this,
@@ -33,20 +33,23 @@ function createSingleCoin({
   xPosition,
   yPosition,
   coinsToWin,
+  coinGravity = gravity,
 }: {
   _this: Phaser.Scene,
-  platforms: Phaser.GameObjects.Group,
+  platforms: Phaser.Physics.Arcade.StaticGroup,
   player: Phaser.Physics.Arcade.Sprite,
   score: { value: number },
   scoreText: Phaser.GameObjects.Text,
   xPosition: number,
   yPosition: number,
   coinsToWin: number,
-}) {
+  coinGravity?: number,
+}): Phaser.Physics.Arcade.Sprite {
   const coin = _this.physics.add.sprite(xPosition, yPosition, 'coin');
 
   coin.setCollideWorldBounds(true);
   coin.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+  coin.setGravityY(coinGravity);
 
   _this.physics.add.collider(coin, platforms);
   _this.physics.add.overlap(
@@ -81,7 +84,7 @@ function createCoins({
   xPosition?: number,
   yPosition?: number,
   coinsToWin: number,
-}) {
+}): Phaser.GameObjects.Group {
   const coins = _this.physics.add.group({
     key: 'coin',
     repeat: numberOfCoins - 1,
@@ -90,6 +93,7 @@ function createCoins({
   coins.children.iterate(function (coin: any) {
     coin.setCollideWorldBounds(true);
     coin.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+    coin.setBounce(0.1);
     return true;
   });
   platforms && _this.physics.add.collider(coins, platforms);
@@ -159,6 +163,7 @@ function createBonusCoin({
   
   bonusCoin.setCollideWorldBounds(true);
   bonusCoin.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
+  bonusCoin.setBounce(0.1);
 
   _this.physics.add.collider(bonusCoin, platforms);
   _this.physics.add.overlap(

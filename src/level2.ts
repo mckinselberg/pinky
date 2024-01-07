@@ -13,6 +13,7 @@ import createSuccessText from './createSuccessText';
 import handleEnemies from './handleEnemies';
 import handleplayerIsHiding from './handleplayerIsHiding';
 import setupCursors from './setupCursors';
+import setupWASD from './setupWASD.js';
 import createScoreText from './createScoreText';
 import createLevelText from './createLevelText';
 
@@ -21,18 +22,19 @@ const { canvasWidth, canvasHeight, gravity, playerVelocity, enemyPositions } = c
 let 
 colliderPlayerPlatform: Phaser.Physics.Arcade.Collider,
 cursors: Phaser.Types.Input.Keyboard.CursorKeys,
+wasd: any,
 enemies: Phaser.GameObjects.Group,
 initialNumberOfCoins: number = 24,
 coinsToWin: number = initialNumberOfCoins + 3,
 gameOver = { value: false },
 gameOverText: Phaser.GameObjects.Text,
 player: Phaser.Physics.Arcade.Sprite,
-platforms: Phaser.GameObjects.Group,
+platforms: Phaser.Physics.Arcade.StaticGroup,
 playerIsHiding = { value: false },
 score = { value: 0 },
 scoreText: Phaser.GameObjects.Text,
 successText: Phaser.GameObjects.Text,
-trees: Phaser.GameObjects.Group,
+trees: Phaser.Physics.Arcade.StaticGroup,
 winner: boolean = false,
 levelText: Phaser.GameObjects.Text,
 level = 2;
@@ -84,6 +86,7 @@ function create(this: Phaser.Scene) {
 
   // set up the cursors
   cursors = setupCursors(this) as Phaser.Types.Input.Keyboard.CursorKeys;
+  wasd = setupWASD(this);
 
   // place the platforms
   platforms = createPlatforms(this);
@@ -161,7 +164,7 @@ const update = function update(this: Phaser.Scene) {
     
   }
 
-  handlePlayer({_this: this, cursors, player, velocity: playerVelocity});
+  handlePlayer({_this: this, cursors, wasd, player, velocity: playerVelocity});
   handleplayerIsHiding(this, player, trees, playerIsHiding);
   handleEnemies(this, enemies, undefined, playerVelocity - 50);
 };

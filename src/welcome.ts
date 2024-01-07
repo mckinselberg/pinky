@@ -11,7 +11,7 @@ import constants from './constants';
 import createPlayer from './createPlayer';
 import handlePlayer from './handlePlayer';
 import setupCursors from './setupCursors';
-// import setupWASD from './setupWASD.js';
+import setupWASD from './setupWASD.js';
 import createCoins from './createCoins';
 import createPlayerAnimations from './createPlayerAnimations';
 import createScoreText from './createScoreText';
@@ -24,7 +24,7 @@ let welcomeText,
     initialNumberOfCoins = 1,
     coinsToWin = initialNumberOfCoins,
     cursors: Phaser.Types.Input.Keyboard.CursorKeys | null,
-    wasd,
+    wasd: any,
     score = { value: 0 },
     scoreText: Phaser.GameObjects.Text,
     winner = false;
@@ -71,7 +71,7 @@ function create(this: Phaser.Scene) {
   
   // cursors
   cursors = setupCursors(this);
-  // wasd = setupWASD(this);
+  wasd = setupWASD(this);
   
   // player
   player = createPlayer(this, 'pinky', 100, 450);
@@ -97,6 +97,7 @@ function update(this: Phaser.Scene) {
   handlePlayer({
     _this: this,
     cursors: cursors!,
+    wasd: wasd,
     player,
     velocity: playerVelocity,
   });
@@ -111,7 +112,7 @@ function update(this: Phaser.Scene) {
       this.scene.start('level1');
     }, 2000);
   }
-  this.scene.start('level5');
+  this.scene.start('level8');
 }
 
 

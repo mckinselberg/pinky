@@ -45,6 +45,7 @@ function handlePlayer({
     value: boolean,
     powerUpActive: boolean
   },
+
 }) {
   const playerIsJumping = isJumping(player);
   const playerIsFalling = isFalling(player);
@@ -57,11 +58,14 @@ function handlePlayer({
     player.anims.stop();
   }
   // cursors = wasd;
-  if (cursors.left.isDown && cursors.right.isUp && cursors.down.isUp) {
+  if (
+    (cursors.left.isDown && cursors.right.isUp && cursors.down.isUp) ||
+    (wasd.left.isDown && wasd.right.isUp && wasd.down.isUp)
+  ) {
     // left
     player.flipX = true;
     player.setVelocityX(-velocity);
-    if (cursors.up.isUp) {
+    if ((cursors.up.isUp && cursors.left.isDown) || (wasd.up.isUp && wasd.left.isDown)) {
       player.body && player.setVelocityY(player.body.velocity.y + 50);
     }
     if (playerIsJumping) {
@@ -70,15 +74,21 @@ function handlePlayer({
       return;
     }
     player.anims.play('left', true);
-  } else if (cursors.left.isUp && player.body && player.body.velocity.x < 0) {
+  } else if (
+    (cursors.left.isUp && player.body && player.body.velocity.x < 0) ||
+    (wasd.left.isUp && player.body && player.body.velocity.x < 0)
+  ) {
     // Only slow down if the player is moving left
     player.setVelocityX(player.body.velocity.x + 10);
 
-  } else if (cursors.right.isDown && cursors.left.isUp && cursors.down.isUp) {
+  } else if (
+    (cursors.right.isDown && cursors.left.isUp && cursors.down.isUp) ||
+    (wasd.right.isDown && wasd.left.isUp && wasd.down.isUp)
+  ) {
     // right
     player.flipX = false;
     player.setVelocityX(velocity);
-    if (cursors.up.isUp) {
+    if ((cursors.up.isUp && cursors.down.isDown) || (wasd.up.isUp && wasd.down.isdown)) {
       if (!player.body) return;
       player.setVelocityY(player.body.velocity.y + 50);
     }
@@ -88,11 +98,14 @@ function handlePlayer({
       return;
     }
     player.anims.play('right', true);
-  } else if (cursors.right.isUp && player.body && player.body.velocity.x > 0) {
+  } else if (
+    (cursors.right.isUp && player.body && player.body.velocity.x > 0) ||
+    (wasd.right.isUp && player.body && player.body.velocity.x > 0)
+  ) {
     // Only slow down if the player is moving right
     player.setVelocityX(player.body.velocity.x - 10);
   
-  } else if (player.body && player.body.velocity.x === 0 && playerIsBlockedDown) {
+  } else if ((player.body && player.body.velocity.x === 0 && playerIsBlockedDown)) {
     player.anims.play('stand');
   }
 
@@ -103,9 +116,15 @@ function handlePlayer({
   }
 
   // jump
-  if (cursors.up.isDown && !playerIsJumping) {
+  if (
+      (cursors.up.isDown && !playerIsJumping) ||
+      (wasd.up.isDown && !playerIsJumping)
+  ) {
     jump();
-  } else if (cursors.up.isUp) {
+  } else if (
+    (cursors.up.isUp) || 
+    (wasd.up.isUp)
+  ) {
     if (!player.body) return;
     player.setVelocityY(player.body.velocity.y + 10);
   } else if (playerIsJumping) {
@@ -117,11 +136,14 @@ function handlePlayer({
   }
 
   // duck
-  if (cursors.down.isDown && !playerIsJumping && playerHasInvincibility.powerUpActive) {
+  if (
+    (cursors.down.isDown && !playerIsJumping && playerHasInvincibility.powerUpActive) ||
+    (wasd.down.isDown && !playerIsJumping && playerHasInvincibility.powerUpActive)
+  ) {
     player.anims.play('hide', true);
     playerHasInvincibility.value = true;
     player.setVelocityX(0);
-  } else if (cursors.down.isUp) {
+  } else if (cursors.down.isUp || wasd.down.isUp) {
     playerHasInvincibility.value = false;
   }
 }
