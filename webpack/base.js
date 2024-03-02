@@ -8,7 +8,7 @@ module.exports = {
   mode: "development",
   devServer: {
     static: {
-      directory: path.join(__dirname, "../dist"),
+      directory: path.join(__dirname, "../build"),
     },
     compress: true,
     port: 8080,
@@ -57,11 +57,11 @@ module.exports = {
   output: {
     publicPath: "/",
     filename: "[name].bundle.js",
-    path: path.resolve(__dirname, "../dist")
+    path: path.resolve(__dirname, "../build")
   },
   plugins: [
     new CleanWebpackPlugin({
-      root: path.resolve(__dirname, "./dist")
+      root: path.resolve(__dirname, "./build")
     }),
     new webpack.DefinePlugin({
       CANVAS_RENDERER: JSON.stringify(true),

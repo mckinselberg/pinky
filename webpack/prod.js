@@ -1,39 +1,87 @@
-const merge = require("webpack-merge");
+const webpack = require("webpack");
 const path = require("path");
-const base = require("./base");
-const TerserPlugin = require("terser-webpack-plugin");
+const HtmlWebpackPlugin = require("html-webpack-plugin");
+const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
-module.exports = merge(base, {
+module.exports = {
   mode: "production",
-  output: {
-    filename: "bundle.min.js"
+
+  entry: {
+    main: "./src/index.ts",
   },
-  devtool: false,
+
   module: {
     rules: [
       {
         test: /\.tsx?$/,
         use: "ts-loader",
-        exclude: "/node_modules/",
-      }
-    ],
-  },
-  performance: {
-    maxEntrypointSize: 900000,
-    maxAssetSize: 900000
-  },
-  optimization: {
-    minimizer: [
-      new TerserPlugin({
-        terserOptions: {
-          output: {
-            comments: false
-          }
+        exclude: "/node_modules/"
+      },
+      {
+        test: /\.js$/,
+        exclude: /node_modules/,
+        use: {
+          loader: "babel-loader"
         }
-      })
+      },
+      {
+        test: [/\.vert$/, /\.frag$/],
+        use: "raw-loader"
+      },
+      {
+        test: /\.(gif|png|jpe?g|svg|xml)$/i,
+        use: "file-loader"
+      },
+      {
+        test: /\.css$/,
+        use: ["style-loader", "css-loader"]
+      },
+      {
+        test: /\.(mp3|ogg)$/,
+        loader: "file-loader"
+      },
+      {
+        test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
+        loader: "file-loader",
+        options: {
+          outputPath: "fonts/"
+        }
+      }
     ]
   },
-  resolve: {
-    extensions: [".ts", ".tsx", ".js"]
+  output: {
+    publicPath: "./",
+    filename: "[name].[contenthash].js",
+    path: path.resolve(__dirname, "../dist")
   },
-});
+  plugins: [
+    new CleanWebpackPlugin({
+      root: path.resolve(__dirname, "./dist")
+    }),
+    new webpack.DefinePlugin({
+      'process.env.NODE_ENV': JSON.stringify('production'),
+      CANVAS_RENDERER: JSON.stringify(true),
+      WEBGL_RENDERER: JSON.stringify(true)
+    }),
+    new HtmlWebpackPlugin({
+      template: "./index.html",
+      minify: {
+        collapseWhitespace: true,
+        removeComments: true,
+        removeRedundantAttributes: true,
+        removeScriptTypeAttributes: true,
+        removeStyleLinkTypeAttributes: true,
+        useShortDoctype: true
+      }
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: "fonts", to: "fonts" },
+      ]
+    })
+  ],
+  resolve: {
+    extensions: [".tsx", ".ts", ".js"],
+  },
+};
