@@ -2,12 +2,26 @@ const webpack = require("webpack");
 const path = require("path");
 const HtmlWebpackPlugin = require("html-webpack-plugin");
 const { CleanWebpackPlugin } = require("clean-webpack-plugin");
+const CopyWebpackPlugin = require("copy-webpack-plugin");
 
 module.exports = {
   mode: "development",
+  devServer: {
+    static: {
+      directory: path.join(__dirname, "../dist"),
+    },
+    compress: true,
+    port: 8080,
+    hot: true,
+  },
   devtool: "eval-source-map",
   module: {
     rules: [
+      {
+        test: /\.tsx?$/,
+        use: "ts-loader",
+        exclude: "/node_modules/"
+      },
       {
         test: /\.js$/,
         exclude: /node_modules/,
@@ -32,21 +46,22 @@ module.exports = {
         loader: "file-loader"
       },
       // {
-      //   // match fonts in ttfs and woffs
-      //   test: /\.(ttf|woff|woff2)$/,
+      //   test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
       //   loader: "file-loader",
       //   options: {
-      //     name: "[name].[ext]",
-      //     outputPath: "assets/fonts/",
-      //     publicPath: "assets/fonts/",
-      //     esModule: false,
+      //     outputPath: "fonts/"
       //   }
       // }
     ]
   },
+  output: {
+    publicPath: "/",
+    filename: "[name].bundle.js",
+    path: path.resolve(__dirname, "../dist")
+  },
   plugins: [
     new CleanWebpackPlugin({
-      root: path.resolve(__dirname, "../")
+      root: path.resolve(__dirname, "./dist")
     }),
     new webpack.DefinePlugin({
       CANVAS_RENDERER: JSON.stringify(true),
@@ -54,6 +69,14 @@ module.exports = {
     }),
     new HtmlWebpackPlugin({
       template: "./index.html"
+    }),
+    new CopyWebpackPlugin({
+      patterns: [
+        { from: "fonts", to: "fonts" },
+      ]
     })
-  ]
+  ],
+  resolve: {
+    extensions: [".tsx", ".ts", ".js"],
+  },
 };

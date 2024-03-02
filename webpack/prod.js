@@ -9,6 +9,15 @@ module.exports = merge(base, {
     filename: "bundle.min.js"
   },
   devtool: false,
+  module: {
+    rules: [
+      {
+        test: /\.tsx?$/,
+        use: "ts-loader",
+        exclude: "/node_modules/",
+      }
+    ],
+  },
   performance: {
     maxEntrypointSize: 900000,
     maxAssetSize: 900000
@@ -23,5 +32,8 @@ module.exports = merge(base, {
         }
       })
     ]
-  }
+  },
+  resolve: {
+    extensions: [".ts", ".tsx", ".js"]
+  },
 });
