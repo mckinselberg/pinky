@@ -1,6 +1,6 @@
 function handleplayerIsHiding(
   _this: Phaser.Scene,
-  player: Phaser.Physics.Arcade.Sprite,
+  player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
   trees: Phaser.Physics.Arcade.StaticGroup,
   playerIsHiding: {value: boolean}
 ): void {

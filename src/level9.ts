@@ -16,7 +16,7 @@ import bonusCoinImg from './assets/sprites/bonus-coin.png';
 import fireballImg from './assets/fireball.png';
 import createScoreText from './createScoreText';
 import createLevelText from './createLevelText';
-import createMovingPlatform from './createMovingPlatform';
+import createPlatform from './createPlatform';
 import { GameObjects } from 'phaser';
 
 const { canvasWidth, canvasHeight, playerVelocity, enemyPositions } = constants;
@@ -45,7 +45,7 @@ let
   successText: Phaser.GameObjects.Text,
   trees: Phaser.Physics.Arcade.StaticGroup,
   winner = false,
-  level = 8,
+  level = 9,
   levelText: Phaser.GameObjects.Text,
   movingPlatforms: Phaser.Physics.Arcade.Sprite[] = [],
   singleCoin: Phaser.Physics.Arcade.Sprite,
@@ -63,18 +63,6 @@ function preload (this: Phaser.Scene) {
   movingPlatforms = [];
 };
 
-
-function handleMovingPlatforms({ yVelocity = 300 }: {yVelocity: number}) {
-  movingPlatforms.forEach((platform: Phaser.Physics.Arcade.Sprite) => {
-    if (platform.body instanceof Phaser.Physics.Arcade.Body && platform.body.blocked.down) {
-      platform.setVelocityY(-yVelocity)
-    }
-    if (platform.body instanceof Phaser.Physics.Arcade.Body && platform.body.blocked.up) {
-      platform.setVelocityY(yVelocity);
-    }
-  });
-}
-
 function create(this: Phaser.Scene) {
   this.cameras.main.fadeIn(1000);
   this.add.image(400, 400, 'background').setScale(.55, .75);
@@ -91,56 +79,64 @@ function create(this: Phaser.Scene) {
   wasd = setupWASD(this);
 
   // player
-  player = createPlayer(this, 'pinky', 10, canvasHeight/2);
+  player = createPlayer(this, 'pinky', 10, canvasHeight/4);
+  
+  stationaryPlatform = createPlatform({
+    _this: this,
+    player,
+    xPosition: 20,
+    yPosition: canvasHeight - 140,
+    scaleX: 0.1,
+    scaleY: 1,
+    moving: false,
+  });
 
-  // moving platforms
-  // movingPlatforms.push(createMovingPlatform({_this: this, player, xPosition: 400, yPosition: 500, scaleX: .25, scaleY: 1}));
-  // movingPlatforms.push(createMovingPlatform({_this: this, player, xPosition: 300, yPosition: 400, scaleX: .10, scaleY: 1}));
-  movingPlatforms.push(createMovingPlatform({
+  stationaryPlatform = createPlatform({
+    _this: this,
+    player,
+    xPosition: canvasWidth - 100,
+    yPosition: canvasHeight / 2,
+    scaleX: 0.1,
+    scaleY: 1,
+    moving: false,
+  });
+
+  movingPlatforms.push(createPlatform({
     _this: this, 
+    player,
+    xPosition: canvasWidth / 4,
+    yPosition: 20,
+    direction: 'vertical',
+    scaleX: 0.5,
+    xSpeed: 0,
+    ySpeed: 100,
+    moving: true,
+  }));
+  movingPlatforms.push(createPlatform({
+    _this: this,
     player,
     xPosition: canvasWidth / 2,
     yPosition: canvasHeight - 30,
-    direction: 'both',
-    scaleX: .075,
-    xSpeed: -50,
-    ySpeed: 100,
-  }));
-  movingPlatforms.push(createMovingPlatform({
-    _this: this,
-    player,
-    xPosition: canvasWidth - 50,
-    yPosition: 50,
-    scaleX: .075,
-    direction: 'vertical',
-    xSpeed: 375,
-  }));
-
-  stationaryPlatform = createMovingPlatform({
-    _this: this,
-    player,
-    xPosition: 0,
-    yPosition: canvasHeight,
-    scaleX: .1,
-    scaleY: 1,
-    // because speed is 0, this is not moving
-    xSpeed: 0,
+    direction: 'horizontal',
+    scaleX: .25,
+    xSpeed: 100,
     ySpeed: 0,
-  });
+    moving: true,
+  }));
 
-  singleCoin = createSingleCoin({
-    _this: this,
-    coinsToWin: coinsToWin,
-    platforms: platforms,
-    player: player,
-    score: score,
-    scoreText: scoreText,
-    xPosition: canvasWidth - 50,
-    yPosition: 0,
-    coinGravity: 1000,
-  });
+  // singleCoin = createSingleCoin({
+  //   _this: this,
+  //   coinsToWin: coinsToWin,
+  //   platforms: platforms,
+  //   player: player,
+  //   score: score,
+  //   scoreText: scoreText,
+  //   xPosition: canvasWidth - 50,
+  //   yPosition: 0,
+  //   coinGravity: 1000,
+  // });
 
-  this.physics.add.collider(singleCoin, movingPlatforms[1]);
+  // this.physics.add.collider(singleCoin, movingPlatforms[1]);
     
   // reset button
   createResetButton({ _this: this, score, playerHasInvincibility, playerHasFireballs });
@@ -148,6 +144,20 @@ function create(this: Phaser.Scene) {
   // success text
   successText = createSuccessText(this);
 };
+
+function handleMovingPlatforms({ yVelocity = 0, xVelocity = 0 }: {yVelocity: number, xVelocity?: number}) {
+  movingPlatforms.forEach((platform: Phaser.Physics.Arcade.Sprite, i) => {
+    if ( ! (platform.body instanceof Phaser.Physics.Arcade.Body) )  return;
+    if (i === 0 && platform.body.y > canvasHeight / 2)              platform.setVelocityY(-yVelocity);
+    if (i === 0 && platform.body.y < 30)                            platform.setVelocityY(yVelocity);
+
+    if (i === 1 && platform.body.x < canvasWidth / 2)               platform.setVelocityX(xVelocity);
+    if (i === 1 && platform.body.x > canvasWidth - 300)             platform.setVelocityX(-xVelocity);
+
+    if (platform.body.blocked.down)                                 platform.setVelocityY(-yVelocity);
+    if (platform.body.blocked.up)                                   platform.setVelocityY(yVelocity);
+  });
+}
 
 const update = function update(this: Phaser.Scene) {
   if (player.y + player.height > canvasHeight) {
@@ -180,7 +190,7 @@ const update = function update(this: Phaser.Scene) {
 
   handleplayerIsHiding(this, player, trees, playerIsHiding);
   handlePlayer({_this: this, cursors, wasd, player,velocity: playerVelocity, playerIsHiding, playerHasInvincibility});
-  handleMovingPlatforms({ yVelocity: 200 });
+  handleMovingPlatforms({ yVelocity: 100, xVelocity: 100 });
   if (score.value === 1 && !finalCoinDropped) {
     const singleCoin = createSingleCoin({
       _this: this,

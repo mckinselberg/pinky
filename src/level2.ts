@@ -28,7 +28,7 @@ initialNumberOfCoins: number = 24,
 coinsToWin: number = initialNumberOfCoins + 3,
 gameOver = { value: false },
 gameOverText: Phaser.GameObjects.Text,
-player: Phaser.Physics.Arcade.Sprite,
+player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
 platforms: Phaser.Physics.Arcade.StaticGroup,
 playerIsHiding = { value: false },
 score = { value: 0 },
@@ -70,6 +70,7 @@ function createTrees(_this: Phaser.Scene, platforms: Phaser.GameObjects.Group) {
 }
 
 function create(this: Phaser.Scene) {
+  this.cameras.main.fadeIn(1000);
   this.add.image(400, 400, 'background3').setScale(.75);;
   gameOver.value = false;
   winner = false;
@@ -155,6 +156,7 @@ const update = function update(this: Phaser.Scene) {
     gameOverText.setVisible(false);
     winner = false;
     score.value = 0;
+    this.cameras.main.fadeOut(1000);
     setTimeout(() => {
       this.scene.stop(`level${level}`);
       this.scene.start(`level${level + 1}`);

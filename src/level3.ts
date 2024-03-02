@@ -21,7 +21,7 @@ import createLevelText from './createLevelText';
 
 const { canvasWidth, canvasHeight, gravity, playerVelocity, enemyPositions } = constants;
 
-let player: Phaser.Physics.Arcade.Sprite,
+let player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
     playerIsHiding = { value: false },
     playerHasInvincibility = { 
       value: false,
@@ -93,6 +93,7 @@ function createTrees(_this: Phaser.Scene, platforms = null) {
 }
 
 function create(this: Phaser.Scene) {
+  this.cameras.main.fadeIn(1000);
   this.add.image(400, 400, 'background3').setScale(.75);;
   gameOver.value = false;
   winner = false;
@@ -194,6 +195,7 @@ const update = function update(this: Phaser.Scene) {
     gameOverText.setVisible(false);
     winner = false;
     score.value = 0;
+    this.cameras.main.fadeOut(1000);
     setTimeout(() => {
       this.scene.stop(`level${level}`);
       this.scene.start(`level${level + 1}`);

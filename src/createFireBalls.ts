@@ -1,6 +1,6 @@
 const fireAction = (
   _this: Phaser.Scene,
-  player: Phaser.Physics.Arcade.Sprite,
+  player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
   fireballs: Phaser.Physics.Arcade.Group,
   playerHasFireballs: {
     value: boolean,
@@ -38,7 +38,7 @@ function createFireBalls({
   }
 }: {
   _this: Phaser.Scene,
-  player: Phaser.Physics.Arcade.Sprite,
+  player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
   platforms: Phaser.Physics.Arcade.StaticGroup | Phaser.Physics.Arcade.Group | any,
   enemies: any,
   enemySprite: string,

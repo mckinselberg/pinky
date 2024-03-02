@@ -20,7 +20,7 @@ const { canvasWidth, canvasHeight, playerVelocity, colors } = constants;
 
 let welcomeText,
     platforms: Phaser.GameObjects.Group,
-    player: Phaser.Physics.Arcade.Sprite,
+    player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
     initialNumberOfCoins = 1,
     coinsToWin = initialNumberOfCoins,
     cursors: Phaser.Types.Input.Keyboard.CursorKeys | null,
@@ -30,7 +30,7 @@ let welcomeText,
     winner = false;
 
 function preload(this: Phaser.Scene) {
-  this.cameras.main.setBackgroundColor('#6bb6ff'); 
+  this.cameras.main.setBackgroundColor('#000'); 
   this.load.image('background', background);
   this.load.image('ground', ground);
   this.load.image('tree', tree);
@@ -49,19 +49,18 @@ function createWelcomeText(_this: Phaser.Scene) {
 }
 
 function create(this: Phaser.Scene) {
+  this.cameras.main.fadeIn(500);
   this.add.image(400, 400, 'background').setScale(.75);
 
   // welcomeText = createWelcomeText(this);
-  scoreText = createScoreText({ _this: this, coinsToWin });
-
+  
   let font = new FontFaceObserver('Planes_ValMore');
+  scoreText = createScoreText({ _this: this, coinsToWin });
   font.load().then(() => {
     welcomeText = createWelcomeText(this);
-    // createResetButton(this, score);
-    // scoreText.setFont('Planes_ValMore');
-    // scoreText.setVisible(false);
+    scoreText.setFontFamily('Planes_Valmore');
   }).catch((e) => {
-    console.error(e);
+    // console.error(e);
   });
   
   this.physics.world.setBounds(0, 0, canvasWidth, canvasHeight);
@@ -81,7 +80,7 @@ function create(this: Phaser.Scene) {
   createCoins({
     _this: this,
     platforms: platforms as Phaser.Physics.Arcade.StaticGroup,
-    player: player as Phaser.Physics.Arcade.Sprite, 
+    player: player as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, 
     numberOfCoins: initialNumberOfCoins,
     score,
     scoreText,
@@ -107,12 +106,13 @@ function update(this: Phaser.Scene) {
   if (winner) {
     winner = false;
     score.value = 0;
+    this.cameras.main.fadeOut(1000);
     setTimeout(() => {
       this.scene.stop('welcome');
       this.scene.start('level1');
     }, 2000);
   }
-  this.scene.start('level8');
+  this.scene.start('level10');
 }
 
 

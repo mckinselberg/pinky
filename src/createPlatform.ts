@@ -24,6 +24,11 @@ function createMovingPlatform({
 }): Phaser.Physics.Arcade.Sprite {
   const platform = _this.physics.add.sprite(xPosition, yPosition, 'ground').setScale(scaleX, scaleY);
   platform.setImmovable(true);
+  platform.setCollideWorldBounds(true);
+  platform.body.allowGravity = false;
+  platform.setBounce(1,0);
+  _this.physics.add.collider(player, platform);
+  if (!moving) return platform;
   if (direction === 'both') {
     platform.setVelocityX(xSpeed);
     platform.setVelocityY(ySpeed);
@@ -34,11 +39,6 @@ function createMovingPlatform({
     platform.setVelocityX(xSpeed);
     platform.setVelocityY(0);
   }
-  platform.body.allowGravity = false;
-  platform.setCollideWorldBounds(true);
-  platform.setBounce(1,0);
-  platform.setCollideWorldBounds(true);  
-  _this.physics.add.collider(player, platform);
   return platform;
 }
 

@@ -34,7 +34,7 @@ function handlePlayer({
   _this: Phaser.Scene,
   cursors: Phaser.Types.Input.Keyboard.CursorKeys,
   wasd: any,
-  player: Phaser.Physics.Arcade.Sprite,
+  player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
   velocity: number,
   playerIsHiding?: { value: boolean },
   playerHasFireballs?: {

@@ -28,7 +28,7 @@ let
   gameOverText: Phaser.GameObjects.Text,
   coinsToWin: number = 1,
   platforms: Phaser.Physics.Arcade.StaticGroup,
-  player: Phaser.Physics.Arcade.Sprite,
+  player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
   playerIsHiding = { value: false },
   playerHasInvincibility = { 
     value: false,
@@ -73,6 +73,7 @@ function handleMovingPlatforms({ yVelocity = 100 }: {yVelocity: number}) {
 }
 
 function create(this: Phaser.Scene) {
+  this.cameras.main.fadeIn(1000);
   this.add.image(400, 400, 'background').setScale(.55, .75);
   gameOver.value = false;
   winner = false;
@@ -130,7 +131,7 @@ const update = function update(this: Phaser.Scene) {
     gameOverText.setVisible(true);
     successText.setVisible(false);
     clearTimeout(timeout);
-    return;
+    // return;
   }
   if (score.value === coinsToWin) {
     winner = true;
@@ -140,10 +141,11 @@ const update = function update(this: Phaser.Scene) {
     gameOverText.setVisible(false);
     winner = false;
     score.value = 0;
+    this.cameras.main.fadeOut(1000);
     // @ts-ignore
     timeout = setTimeout(() => {
-      // this.scene.stop(`level${level}`);
-      // this.scene.start(`level${level + 1}`);
+      this.scene.stop(`level${level}`);
+      this.scene.start(`level${level + 1}`);
     }, 2000);
     return;
   }

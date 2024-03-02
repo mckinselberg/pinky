@@ -1,6 +1,6 @@
 function createOverlapPlayerEnemies(
   _this: Phaser.Scene,
-  player: Phaser.Physics.Arcade.Sprite,
+  player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
   enemies: Phaser.GameObjects.Group,
   colliderPlayerPlatform: Phaser.Physics.Arcade.Collider,
   playerIsHiding: { value: boolean },

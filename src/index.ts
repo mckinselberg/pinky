@@ -9,10 +9,12 @@ import level5 from './level5';
 import level6 from './level6';
 import level7 from './level7';
 import level8 from './level8';
+import level9 from './level9';
+import level10 from './level10';
 
 const { canvasWidth, canvasHeight, gravity, debug } = constants;
 
-const config = {
+const config: Phaser.Types.Core.GameConfig = {
   type: Phaser.AUTO,
   width: canvasWidth,
   height: canvasHeight,
@@ -33,6 +35,8 @@ const config = {
     level6,
     level7,
     level8,
+    level9,
+    level10,
   ],
 };
 

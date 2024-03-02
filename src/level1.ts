@@ -20,7 +20,7 @@ import handleEnemies from './handleEnemies';
 
 const { canvasWidth, canvasHeight, gravity, playerVelocity, enemyPositions } = constants;
 
-let player: Phaser.Physics.Arcade.Sprite,
+let player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
     playerIsHiding = { value: false, cursorIsDown: false },
     trees: Phaser.Physics.Arcade.StaticGroup,
     colliderPlayerPlatform,
@@ -40,8 +40,8 @@ let player: Phaser.Physics.Arcade.Sprite,
     level = 1;
 
 function preload (this: Phaser.Scene) {
+  this.cameras.main.setBackgroundColor('#000');
   this.load.image('background2', background2);
-  this.cameras.main.setBackgroundColor('#6bb6ff');
   this.load.spritesheet('enemy', enemy, { frameWidth: 32, frameHeight: 32 });
 };
 
@@ -58,6 +58,7 @@ function createPlatforms(_this: Phaser.Scene) {
 }
 
 function create(this: Phaser.Scene) {
+  this.cameras.main.fadeIn(1000);
   gameOver.value = false;
   winner = false;
   
@@ -138,7 +139,6 @@ function create(this: Phaser.Scene) {
 
   // player overlap with enemy
   createOverlapPlayerEnemies(this, player, enemies, colliderPlayerPlatform, playerIsHiding, gameOver, winner);
-
 };
 
 function update(this: Phaser.Scene) {
@@ -154,6 +154,7 @@ function update(this: Phaser.Scene) {
     gameOverText.setVisible(false);
     winner = false;
     score.value = 0;
+    this.cameras.main.fadeOut(1000);
     setTimeout(() => {
       this.scene.stop(`level${level}`);
       this.scene.start(`level${level + 1}`);

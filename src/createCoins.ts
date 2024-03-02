@@ -26,7 +26,7 @@ function collectCoin({
 
 function createSingleCoin({
   _this,
-  platforms,
+  platforms = null,
   player,
   score,
   scoreText,
@@ -36,8 +36,8 @@ function createSingleCoin({
   coinGravity = gravity,
 }: {
   _this: Phaser.Scene,
-  platforms: Phaser.Physics.Arcade.StaticGroup,
-  player: Phaser.Physics.Arcade.Sprite,
+  platforms?: Phaser.Physics.Arcade.StaticGroup | null,
+  player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
   score: { value: number },
   scoreText: Phaser.GameObjects.Text,
   xPosition: number,
@@ -51,7 +51,7 @@ function createSingleCoin({
   coin.setBounceY(Phaser.Math.FloatBetween(0.4, 0.8));
   coin.setGravityY(coinGravity);
 
-  _this.physics.add.collider(coin, platforms);
+  platforms && _this.physics.add.collider(coin, platforms);
   _this.physics.add.overlap(
     player,
     coin,
@@ -77,7 +77,7 @@ function createCoins({
 }: {
   _this: Phaser.Scene,
   platforms: Phaser.GameObjects.Group,
-  player: Phaser.Physics.Arcade.Sprite,
+  player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
   numberOfCoins: number,
   score: { value: number },
   scoreText: Phaser.GameObjects.Text,
@@ -151,7 +151,7 @@ function createBonusCoin({
 }: {
   _this: Phaser.Scene,
   platforms: Phaser.GameObjects.Group,
-  player: Phaser.Physics.Arcade.Sprite,
+  player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
   score: { value: number },
   scoreText: Phaser.GameObjects.Text,
   xPosition: number,

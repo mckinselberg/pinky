@@ -8,7 +8,7 @@ function isJumping(player: Physics.Arcade.Sprite) {
   return player.body && !player.body.touching.down && !player.body.blocked.down;
 }
 function isFalling(player: Physics.Arcade.Sprite) {
-  return player.body && player.body.velocity.y > 0;
+  return player.body && player.body.velocity.y > 0 && !player.body.blocked.down;
 }
 
 function isTouchingWorldBounds(player: Physics.Arcade.Sprite) {
@@ -34,7 +34,7 @@ function handlePlayer({
   _this: Phaser.Scene,
   cursors: Phaser.Types.Input.Keyboard.CursorKeys,
   wasd: any,
-  player: Phaser.Physics.Arcade.Sprite,
+  player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
   velocity: number,
   playerIsHiding?: { value: boolean },
   playerHasFireballs?: {
@@ -46,6 +46,7 @@ function handlePlayer({
     powerUpActive: boolean
   },
 }) {
+  if (!player.body) return;
   const playerIsJumping = isJumping(player);
   const playerIsFalling = isFalling(player);
   const playerIsTouchingWorldBounds = isTouchingWorldBounds(player);
@@ -97,6 +98,7 @@ function handlePlayer({
   }
 
   function jump() {
+    if (!player.body) return;
     player.setVelocityY(-500);
     player.anims.play('jump', true);
     _this.sound.play('jump');
