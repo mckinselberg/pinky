@@ -1,5 +1,5 @@
 const constants = {
-  debug: true,
+  debug: false,
   canvasWidth: 800,
   canvasHeight: 600,
   gravity: 300,
