@@ -112,7 +112,7 @@ function update(this: Phaser.Scene) {
       this.scene.start('level1');
     }, 2000);
   }
-  // this.scene.start('level10');
+  this.scene.start('level4');
 }
 
 

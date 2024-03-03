@@ -43,7 +43,7 @@ let player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
     gameOverText: Phaser.GameObjects.Text,
     successText: Phaser.GameObjects.Text,
     levelText: Phaser.GameObjects.Text,
-    enemyVelocity = 200,
+    enemyVelocity = 100,
     bonusCoin: Phaser.GameObjects.Sprite,
     level = 4;
 
@@ -71,10 +71,6 @@ function createTrees(_this: Phaser.Scene, platforms = null) {
   for (let i = 0; i < canvasWidth; i+=canvasWidth/10) {
     trees.create(canvasWidth - i - 40, canvasHeight - 20, 'tree');
   }
-  // trees.children.iterate(function(tree, idx) {
-  //   tree.body.setSize(50, 40);
-  //   if (idx === 0) tree.setFlipX(true);
-  // });
   platforms && _this.physics.add.collider(trees, platforms);
   return trees;
 }
@@ -91,22 +87,9 @@ function create(this: Phaser.Scene) {
   
   // place the platforms
   platforms = createPlatforms(this);
-
-  // scoreText = this.add.text(16, 16, `Score: 0 / ${coinsToWin}`, { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
-  // levelText = this.add.text(16, 40, `Level: ${level}`, { fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
   scoreText = createScoreText({ _this: this, coinsToWin });
   levelText = createLevelText({ _this: this, level });
   gameOverText = createGameOverText(this);
-  
-  // let font = new FontFaceObserver('Planes_ValMore');
-  // font.load().then(() => {
-    // game over text
-    // scoreText.setFont({ fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
-    // levelText.setFont({ fontSize: '25px', fill: '#000', fontFamily: 'Planes_ValMore' });
-    // score
-  // }).catch((error) => {
-  //   console.error(error);
-  // });
   
   // create enemies
   enemies = createEnemies({
