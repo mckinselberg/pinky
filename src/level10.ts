@@ -52,7 +52,7 @@ let
   movingPlatforms: Phaser.Physics.Arcade.Sprite[] = [],
   singleCoin: Phaser.Physics.Arcade.Sprite,
   timeout: number,
-  finalCoinDropped = false,
+  finalCoinDropped = { value: false },
   // stationaryPlatform: Phaser.Physics.Arcade.Sprite,
   ground: Phaser.Tilemaps.TilemapLayer | null,
   enemies: Phaser.GameObjects.Group,
@@ -129,7 +129,7 @@ function create(this: Phaser.Scene) {
 
     
   // reset button
-  createResetButton({ _this: this, score, playerHasInvincibility, playerHasFireballs });
+  createResetButton({ _this: this, score, playerHasInvincibility, playerHasFireballs, finalCoinDropped });
   
   // success text
   successText = createSuccessText(this);
@@ -159,7 +159,7 @@ const update = function update(this: Phaser.Scene) {
     gameOverText.setVisible(true);
     successText.setVisible(false);
     score.value = 0;
-    finalCoinDropped = false;
+    finalCoinDropped.value = false;
     clearTimeout(timeout);
     // return;
   }
@@ -185,7 +185,7 @@ const update = function update(this: Phaser.Scene) {
   handleMovingPlatforms({ yVelocity: 100, xVelocity: 100 });
   handleEnemies(this, enemies, 'enemy', 200);
 
-  if (score.value === 1 && !finalCoinDropped) {
+  if (score.value === 1 && !finalCoinDropped.value) {
     const singleCoin2 = createSingleCoin({
       _this: this,
       coinsToWin: coinsToWin,
@@ -195,7 +195,7 @@ const update = function update(this: Phaser.Scene) {
       xPosition: 10,
       yPosition: 0,
     });
-    finalCoinDropped = true;
+    finalCoinDropped.value = true;
     ground && this.physics.add.collider(singleCoin2, ground);
   }
 };

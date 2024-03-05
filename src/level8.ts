@@ -50,7 +50,7 @@ let
   movingPlatforms: Phaser.Physics.Arcade.Sprite[] = [],
   singleCoin: Phaser.Physics.Arcade.Sprite,
   timeout: number,
-  finalCoinDropped = false,
+  finalCoinDropped = { value: false },
   stationaryPlatform: Phaser.Physics.Arcade.Sprite;
 
 function preload (this: Phaser.Scene) {
@@ -143,7 +143,7 @@ function create(this: Phaser.Scene) {
   this.physics.add.collider(singleCoin, movingPlatforms[1]);
     
   // reset button
-  createResetButton({ _this: this, score, playerHasInvincibility, playerHasFireballs });
+  createResetButton({ _this: this, score, playerHasInvincibility, playerHasFireballs, finalCoinDropped });
   
   // success text
   successText = createSuccessText(this);
@@ -181,7 +181,7 @@ const update = function update(this: Phaser.Scene) {
   handleplayerIsHiding(this, player, trees, playerIsHiding);
   handlePlayer({_this: this, cursors, wasd, player,velocity: playerVelocity, playerIsHiding, playerHasInvincibility});
   handleMovingPlatforms({ yVelocity: 200 });
-  if (score.value === 1 && !finalCoinDropped) {
+  if (score.value === 1 && !finalCoinDropped.value) {
     const singleCoin = createSingleCoin({
       _this: this,
       coinsToWin: coinsToWin,
@@ -193,7 +193,7 @@ const update = function update(this: Phaser.Scene) {
       yPosition: 0,
     });
     this.physics.add.collider(stationaryPlatform, singleCoin);
-    finalCoinDropped = true;
+    finalCoinDropped.value = true;
   }
 };
 

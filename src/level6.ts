@@ -55,7 +55,7 @@ let
   level = 6,
   levelText: Phaser.GameObjects.Text,
   activeEnemies = 0,
-  finalCoinDropped = false,
+  finalCoinDropped = { value: false },
   timeout: number;
     
 function preload (this: Phaser.Scene) {
@@ -173,7 +173,7 @@ function create(this: Phaser.Scene) {
   });
   
   // reset button
-  createResetButton({ _this: this, score, playerHasInvincibility, playerHasFireballs });
+  createResetButton({ _this: this, score, playerHasInvincibility, playerHasFireballs, finalCoinDropped });
   
   // success text
   successText = createSuccessText(this);
@@ -215,7 +215,7 @@ const update = function update(this: Phaser.Scene) {
   handleEnemies(this, enemies, 'enemy',  enemyVelocity);
   handleEnemies(this, enemies2, 'enemy2', 100);
 
-  if (enemies2.countActive() === 0 && !finalCoinDropped) {
+  if (enemies2.countActive() === 0 && !finalCoinDropped.value) {
     createSingleCoin({
       _this: this,
       coinsToWin: coinsToWin,
@@ -226,7 +226,7 @@ const update = function update(this: Phaser.Scene) {
       xPosition: canvasWidth/2,
       yPosition: 0,
     });
-    finalCoinDropped = true;
+    finalCoinDropped.value = true;
   }
 };
 

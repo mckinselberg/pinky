@@ -4,10 +4,14 @@ function createResetButton({
   playerHasInvincibility = {
     value: false,
     powerUpActive: false
-  }, playerHasFireballs = {
+  }, 
+  playerHasFireballs = {
     value: false,
     powerUpActive: false
-  } 
+  },
+  finalCoinDropped = {
+    value: false
+  }
 }: {
   _this: Phaser.Scene,
   score: {
@@ -21,6 +25,9 @@ function createResetButton({
     value: boolean,
     powerUpActive: boolean
   }
+  finalCoinDropped?: {
+    value: boolean
+  }
 }) {
   const resetActions =  () => {
     playerHasFireballs.value = false;
@@ -29,6 +36,7 @@ function createResetButton({
     playerHasInvincibility.powerUpActive = false;
     score.value = 0;
     _this.scene.restart();
+    finalCoinDropped.value = false;
   }
   const resetButton = _this.add.text(700, 16, 'Reset', { fontSize: '25px', fontFamily: 'Planes_ValMore' });
   resetButton.setColor('black');
