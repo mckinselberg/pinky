@@ -2,6 +2,8 @@
 
 A Phaser 3 project template with ES6 support via [Babel 7](https://babeljs.io/) and [Webpack 4](https://webpack.js.org/) that includes hot-reloading for development and production-ready builds.
 
+Demo: [https://pinky-ypr7.onrender.com](https://pinky-ypr7.onrender.com)
+
 This has been updated for Phaser 3.50.0 version and above.
 
 Loading images via JavaScript module `import` is also supported, although not recommended.
