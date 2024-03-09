@@ -16,7 +16,7 @@ import createCoins from './createCoins';
 import createPlayerAnimations from './createPlayerAnimations';
 import createScoreText from './createScoreText';
 
-const { canvasWidth, canvasHeight, playerVelocity, colors } = constants;
+const { canvasWidth, canvasHeight, playerVelocity, colors, debug, debugStartLevel } = constants;
 
 let welcomeText,
     platforms: Phaser.GameObjects.Group,
@@ -51,8 +51,6 @@ function createWelcomeText(_this: Phaser.Scene) {
 function create(this: Phaser.Scene) {
   this.cameras.main.fadeIn(500);
   this.add.image(400, 400, 'background').setScale(.75);
-
-  // welcomeText = createWelcomeText(this);
   
   let font = new FontFaceObserver('Planes_ValMore');
   scoreText = createScoreText({ _this: this, coinsToWin });
@@ -108,11 +106,11 @@ function update(this: Phaser.Scene) {
     score.value = 0;
     this.cameras.main.fadeOut(1000);
     setTimeout(() => {
-      this.scene.stop('welcome');
       this.scene.start('level1');
     }, 2000);
   }
-  // this.scene.start('level9');
+  
+  if (debug) this.scene.start(debugStartLevel);
 }
 
 

@@ -45,13 +45,13 @@ module.exports = {
         test: /\.(mp3|ogg)$/,
         loader: "file-loader"
       },
-      // {
-      //   test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
-      //   loader: "file-loader",
-      //   options: {
-      //     outputPath: "fonts/"
-      //   }
-      // }
+      {
+        test: /\.(woff(2)?|ttf|eot|svg)(\?v=\d+\.\d+\.\d+)?$/,
+        loader: "file-loader",
+        options: {
+          outputPath: "fonts/"
+        }
+      }
     ]
   },
   output: {

@@ -80,7 +80,7 @@ function create(this: Phaser.Scene) {
   wasd = setupWASD(this);
 
   // player
-  player = createPlayer(this, 'pinky', canvasWidth - 100, canvasHeight/4);
+  player = createPlayer(this, 'pinky', 20, canvasHeight/4);
   
   stationaryPlatform1 = createPlatform({
     _this: this,
@@ -126,18 +126,6 @@ function create(this: Phaser.Scene) {
     moving: true,
   }));
 
-  movingPlatforms.push(createPlatform({
-    _this: this,
-    player,
-    xPosition: canvasWidth / 3 - 100,
-    yPosition: canvasHeight - 30,
-    direction: 'horizontal',
-    scaleX: .25,
-    xSpeed: 100,
-    ySpeed: 0,
-    moving: true,
-  }));
-
   singleCoin = createSingleCoin({
     _this: this,
     coinsToWin: coinsToWin,
@@ -156,7 +144,7 @@ function create(this: Phaser.Scene) {
   createResetButton({ _this: this, score, playerHasInvincibility, playerHasFireballs, finalCoinDropped });
   
   // success text
-  successText = createSuccessText(this);
+  successText = createSuccessText(this, level);
 };
 
 function handleMovingPlatforms({ yVelocity = 0, xVelocity = 0 }: {yVelocity: number, xVelocity?: number}) {
@@ -209,7 +197,6 @@ const update = function update(this: Phaser.Scene) {
   handleplayerIsHiding(this, player, trees, playerIsHiding);
   handlePlayer({_this: this, cursors, wasd, player,velocity: playerVelocity, playerIsHiding, playerHasInvincibility});
   handleMovingPlatforms({ yVelocity: 100, xVelocity: 100 });
-
   if (score.value === 1 && !finalCoinDropped.value) {
     const singleCoin = createSingleCoin({
       _this: this,
@@ -221,6 +208,18 @@ const update = function update(this: Phaser.Scene) {
       xPosition: 10,
       yPosition: 0,
     });
+    movingPlatforms.push(createPlatform({
+      _this: this,
+      player,
+      xPosition: canvasWidth / 3 - 100,
+      yPosition: canvasHeight - 30,
+      direction: 'horizontal',
+      scaleX: .25,
+      xSpeed: 100,
+      ySpeed: 0,
+      moving: true,
+    }));
+
     this.physics.add.collider(stationaryPlatform1, singleCoin);
     finalCoinDropped.value = true;
   }

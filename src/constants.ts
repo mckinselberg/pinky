@@ -1,5 +1,6 @@
 const constants = {
   debug: false,
+  debugStartLevel: 'level10',
   canvasWidth: 800,
   canvasHeight: 600,
   gravity: 300,

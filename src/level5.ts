@@ -175,7 +175,7 @@ function create(this: Phaser.Scene) {
   createResetButton({ _this: this, score, playerHasInvincibility, playerHasFireballs, finalCoinDropped });
   
   // success text
-  successText = createSuccessText(this);
+  successText = createSuccessText(this, level);
 };
 
 

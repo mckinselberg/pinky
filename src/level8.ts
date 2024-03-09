@@ -17,7 +17,6 @@ import fireballImg from './assets/fireball.png';
 import createScoreText from './createScoreText';
 import createLevelText from './createLevelText';
 import createMovingPlatform from './createMovingPlatform';
-import { GameObjects } from 'phaser';
 
 const { canvasWidth, canvasHeight, playerVelocity, enemyPositions } = constants;
 
@@ -146,7 +145,7 @@ function create(this: Phaser.Scene) {
   createResetButton({ _this: this, score, playerHasInvincibility, playerHasFireballs, finalCoinDropped });
   
   // success text
-  successText = createSuccessText(this);
+  successText = createSuccessText(this, level);
 };
 
 const update = function update(this: Phaser.Scene) {
@@ -159,7 +158,8 @@ const update = function update(this: Phaser.Scene) {
     gameOverText.setVisible(true);
     successText.setVisible(false);
     clearTimeout(timeout);
-    // return;
+    finalCoinDropped.value = false;
+    return;
   }
   if (score.value === coinsToWin) {
     winner = true;

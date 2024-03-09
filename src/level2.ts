@@ -40,13 +40,9 @@ levelText: Phaser.GameObjects.Text,
 level = 2;
 
 function preload (this: Phaser.Scene) {
-  this.load.image('background3', background3)
+  this.cameras.main.setBackgroundColor('#000');
+  this.load.image('background3', background3);
   this.cameras.main.setBackgroundColor('#6bb6ff');
-  this.load.spritesheet(
-    'enemy',
-    enemy,
-    { frameWidth: 32, frameHeight: 32 }
-  );
 };
 
 function createPlatforms(_this: Phaser.Scene) {
@@ -79,7 +75,7 @@ function create(this: Phaser.Scene) {
 
   scoreText = createScoreText({ _this: this, coinsToWin });
   levelText = createLevelText({ _this: this, level });
-  successText = createSuccessText(this);
+  successText = createSuccessText(this, level);
   gameOverText = createGameOverText(this);
 
   // reset button
@@ -163,7 +159,6 @@ const update = function update(this: Phaser.Scene) {
     }, 2000);
     enemies.clear(true, true);
     return;
-    
   }
 
   handlePlayer({_this: this, cursors, wasd, player, velocity: playerVelocity});

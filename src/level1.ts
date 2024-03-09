@@ -72,7 +72,7 @@ function create(this: Phaser.Scene) {
   createResetButton({ _this: this, score });
 
   // success text
-  successText = createSuccessText(this);
+  successText = createSuccessText(this, level);
 
   // set up the cursors
   cursors = setupCursors(this) as Phaser.Types.Input.Keyboard.CursorKeys;

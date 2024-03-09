@@ -61,7 +61,6 @@ function preload (this: Phaser.Scene) {
     enemy2,
     { frameWidth: 32, frameHeight: 32 }
   );
-  
   this.load.spritesheet(
     'bonusCoin',
     bonusCoinImg,
@@ -106,7 +105,7 @@ function create(this: Phaser.Scene) {
   let font = new FontFaceObserver('Planes_ValMore');
   scoreText = createScoreText({ _this: this, coinsToWin });
   levelText = createLevelText({ _this: this, level });
-  successText = createSuccessText(this);
+  successText = createSuccessText(this, level);
   gameOverText = createGameOverText(this);
 
   // set up the cursors
