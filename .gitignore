@@ -13,3 +13,8 @@ node_modules/
 # Build
 dist/
 /npm-debug.log
+
+# Design files
+# Design files
+psd/
+*.psd
