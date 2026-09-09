@@ -37,7 +37,6 @@ function createMovingPlatform({
   platform.body.allowGravity = false;
   platform.setCollideWorldBounds(true);
   platform.setBounce(1,0);
-  platform.setCollideWorldBounds(true);  
   _this.physics.add.collider(player, platform);
   return platform;
 }

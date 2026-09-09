@@ -1,3 +1,4 @@
+import { WASDKeys } from './types';
 import createEnemies from './createEnemies';
 import createFireBalls from './createFireBalls';
 import createGameOverText from './createGameOverText';
@@ -14,7 +15,7 @@ import handleEnemies from './handleEnemies';
 import handlePlayer from './handlePlayer';
 import handleplayerIsHiding from './handleplayerIsHiding';
 import setupCursors from './setupCursors';
-import setupWASD from './setupWASD.js';
+import setupWASD from './setupWASD';
 import background4 from './assets/bg4.png';
 import bonusCoinImg from './assets/sprites/bonus-coin.png';
 import fireballImg from './assets/fireball.png';
@@ -26,11 +27,11 @@ const { canvasWidth, canvasHeight, gravity, playerVelocity, enemyPositions } = c
 let 
   colliderPlayerPlatform: Phaser.Physics.Arcade.Collider,
   cursors: Phaser.Types.Input.Keyboard.CursorKeys,
-  wasd: any,
-  enemies: Phaser.GameObjects.Group,
-  enemies2: Phaser.GameObjects.Group,
+  wasd: WASDKeys,
+  enemies: Phaser.Physics.Arcade.Group,
+  enemies2: Phaser.Physics.Arcade.Group,
   enemyVelocity = 200,
-  fireBalls: Phaser.GameObjects.Group,
+  fireBalls: Phaser.Physics.Arcade.Group,
   gameOver = { value: false },
   gameOverText: Phaser.GameObjects.Text,
   coinsToWin = 3,
@@ -54,9 +55,8 @@ let
   winner = false,
   level = 6,
   levelText: Phaser.GameObjects.Text,
-  activeEnemies = 0,
   finalCoinDropped = { value: false },
-  timeout: number;
+  timeout: ReturnType<typeof setTimeout>;
     
 function preload (this: Phaser.Scene) {
   this.cameras.main.setBackgroundColor('#6bb6ff');
@@ -107,7 +107,10 @@ function create(this: Phaser.Scene) {
   
   // place the platforms
   platforms = createPlatforms(this);
-  
+
+  // trees
+  trees = createTrees(this);
+
   // create enemies
   enemies = createEnemies({
     _this: this,
@@ -202,7 +205,6 @@ const update = function update(this: Phaser.Scene) {
     enemies.clear(true, true);
     enemies2.clear(true, true);
     this.cameras.main.fadeOut(1000);
-    // @ts-ignore
     timeout = setTimeout(() => {
       this.scene.stop(`level${level}`);
       this.scene.start(`level${level + 1}`);

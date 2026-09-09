@@ -1,10 +1,10 @@
+import { WASDKeys } from './types';
 import constants from './constants';
 import enemy from './assets/sprites/enemy.png';
-import enemy2 from './assets/sprites/enemy2.png';
 import background2 from './assets/bg1.png';
 import FontFaceObserver from 'fontfaceobserver';
 import setupCursors from './setupCursors';
-import setupWASD from './setupWASD.js';
+import setupWASD from './setupWASD';
 import createPlayer from './createPlayer';
 import handlePlayer from './handlePlayer';
 import createEnemies from './createEnemies';
@@ -27,7 +27,7 @@ let player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
     enemies: Phaser.Physics.Arcade.Group,
     platforms: Phaser.Physics.Arcade.StaticGroup,
     cursors: Phaser.Types.Input.Keyboard.CursorKeys,
-    wasd: any,
+    wasd: WASDKeys,
     initialNumberOfCoins = 6,
     coinsToWin =  initialNumberOfCoins + 2,
     score = { value: 0 },

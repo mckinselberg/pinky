@@ -1,3 +1,4 @@
+import { WASDKeys } from './types';
 import createGameOverText from './createGameOverText';
 import createPlayer from './createPlayer';
 import createResetButton from './createResetButton';
@@ -8,10 +9,9 @@ import enemy from './assets/sprites/enemy.png';
 import enemy2 from './assets/sprites/enemy2.png';
 import FontFaceObserver from 'fontfaceobserver';
 import handlePlayer from './handlePlayer';
-import handleplayerIsHiding from './handleplayerIsHiding';
 import handleEnemies from './handleEnemies';
 import setupCursors from './setupCursors';
-import setupWASD from './setupWASD.js';
+import setupWASD from './setupWASD';
 import background from './assets/bg1.png';
 import bonusCoinImg from './assets/sprites/bonus-coin.png';
 import fireballImg from './assets/fireball.png';
@@ -29,33 +29,21 @@ let
   gameOver = { value: false },
   coinsToWin: number = 2,
   cursors: Phaser.Types.Input.Keyboard.CursorKeys,
-  wasd: any,
+  wasd: WASDKeys,
   gameOverText: Phaser.GameObjects.Text,
   // platforms: Phaser.Physics.Arcade.StaticGroup,
   player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
-  playerIsHiding = { value: false },
-  playerHasInvincibility = { 
-    value: false,
-    powerUpActive: false,
-    powerUpMessage: '🔽 hide from aliens'
-  },
-  playerHasFireballs = { 
-    value: false,
-    powerUpActive: false,
-    powerUpMessage: 'F to shoot to shoot owls'
-  },
   score = { value: 0 },
   scoreText: Phaser.GameObjects.Text,
   successText: Phaser.GameObjects.Text,
-  trees: Phaser.Physics.Arcade.StaticGroup,
   levelText: Phaser.GameObjects.Text,
   movingPlatforms: Phaser.Physics.Arcade.Sprite[] = [],
   singleCoin: Phaser.Physics.Arcade.Sprite,
-  timeout: number,
+  timeout: ReturnType<typeof setTimeout>,
   finalCoinDropped = { value: false },
   // stationaryPlatform: Phaser.Physics.Arcade.Sprite,
   ground: Phaser.Tilemaps.TilemapLayer | null,
-  enemies: Phaser.GameObjects.Group,
+  enemies: Phaser.Physics.Arcade.Group,
   enemyCollisions:  Phaser.Tilemaps.TilemapLayer | null;
 
 function preload (this: Phaser.Scene) {
@@ -129,7 +117,7 @@ function create(this: Phaser.Scene) {
 
     
   // reset button
-  createResetButton({ _this: this, score, playerHasInvincibility, playerHasFireballs, finalCoinDropped });
+  createResetButton({ _this: this, score, finalCoinDropped });
   
   // success text
   successText = createSuccessText(this, level);
@@ -161,7 +149,7 @@ const update = function update(this: Phaser.Scene) {
     score.value = 0;
     finalCoinDropped.value = false;
     clearTimeout(timeout);
-    // return;
+    return;
   }
   if (score.value === coinsToWin) {
     winner = true;
@@ -172,7 +160,6 @@ const update = function update(this: Phaser.Scene) {
     winner = false;
     score.value = 0;
     this.cameras.main.fadeOut(1000);
-    // @ts-ignore
     timeout = setTimeout(() => {
       this.scene.stop(`level${level}`);
       this.scene.start(`level${level + 1}`);
@@ -180,8 +167,7 @@ const update = function update(this: Phaser.Scene) {
     return;
   }
 
-  handleplayerIsHiding(this, player, trees, playerIsHiding);
-  handlePlayer({_this: this, cursors, wasd, player,velocity: playerVelocity, playerIsHiding, playerHasInvincibility});
+  handlePlayer({_this: this, cursors, wasd, player, velocity: playerVelocity});
   handleMovingPlatforms({ yVelocity: 100, xVelocity: 100 });
   handleEnemies(this, enemies, 'enemy', 200);
 

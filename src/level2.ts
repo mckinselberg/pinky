@@ -1,3 +1,4 @@
+import { WASDKeys } from './types';
 import background3 from './assets/bg3.png';
 import constants from './constants';
 import createPlayer from './createPlayer';
@@ -13,7 +14,7 @@ import createSuccessText from './createSuccessText';
 import handleEnemies from './handleEnemies';
 import handleplayerIsHiding from './handleplayerIsHiding';
 import setupCursors from './setupCursors';
-import setupWASD from './setupWASD.js';
+import setupWASD from './setupWASD';
 import createScoreText from './createScoreText';
 import createLevelText from './createLevelText';
 
@@ -22,8 +23,8 @@ const { canvasWidth, canvasHeight, gravity, playerVelocity, enemyPositions } = c
 let 
 colliderPlayerPlatform: Phaser.Physics.Arcade.Collider,
 cursors: Phaser.Types.Input.Keyboard.CursorKeys,
-wasd: any,
-enemies: Phaser.GameObjects.Group,
+wasd: WASDKeys,
+enemies: Phaser.Physics.Arcade.Group,
 initialNumberOfCoins: number = 24,
 coinsToWin: number = initialNumberOfCoins + 3,
 gameOver = { value: false },
@@ -56,7 +57,7 @@ function createPlatforms(_this: Phaser.Scene) {
   return platforms
 }
 
-function createTrees(_this: Phaser.Scene, platforms: Phaser.GameObjects.Group) {
+function createTrees(_this: Phaser.Scene, platforms: Phaser.Physics.Arcade.StaticGroup) {
   const trees = _this.physics.add.staticGroup();
   trees.create(canvasWidth - 150, canvasHeight - 90, 'tree');
   trees.create(canvasWidth - 20, canvasHeight - 90, 'tree');

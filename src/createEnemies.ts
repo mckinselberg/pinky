@@ -3,7 +3,7 @@ import constants from "./constants";
 
 const { enemyPositions } = constants;
 
-function createEnemies(this: any, {
+function createEnemies({
   _this,
   enemySprite = 'enemy',
   enemyVelocity = 300,
@@ -23,8 +23,9 @@ function createEnemies(this: any, {
   const enemies = _this.physics.add.group();
   const platformEnds = _this.physics.add.group();
   if (platforms) {
-    platforms.children.iterate(function (platform: any, i: any): boolean | null {
+    platforms.children.iterate(function (platformObject: Phaser.GameObjects.GameObject, i: number): boolean | null {
       if (removeNthEnemies.includes(i)) return null;
+      const platform = platformObject as Phaser.Physics.Arcade.Sprite;
       let enemyPosition; 
       switch (position) {
         case 'left':
@@ -67,8 +68,9 @@ function createEnemies(this: any, {
     }, _this);
   
 
-    _this.physics.add.overlap(enemies, platformEnds, function (enemy: any) {
-      enemy.setVelocityX(-enemy.body.velocity.x);
+    _this.physics.add.overlap(enemies, platformEnds, function (enemyObject: Phaser.Tilemaps.Tile | Phaser.Types.Physics.Arcade.GameObjectWithBody) {
+      const enemy = enemyObject as Phaser.Physics.Arcade.Sprite;
+      enemy.setVelocityX(-enemy.body!.velocity.x);
     }, undefined, _this);
   } else {
     const enemy = _this.physics.add.sprite(
@@ -86,10 +88,11 @@ function createEnemies(this: any, {
 
 
   // enemies
-  enemies.children.iterate(function (enemy: any) {
+  enemies.children.iterate(function (enemyObject: Phaser.GameObjects.GameObject) {
+    const enemy = enemyObject as Phaser.Physics.Arcade.Sprite;
     enemy.setBounce(0.1);
     enemy.setCollideWorldBounds(true);
-    enemy.body.setGravityY(gravity);
+    (enemy.body as Phaser.Physics.Arcade.Body).setGravityY(gravity);
     platforms && _this.physics.add.collider(enemy, platforms);
     return true;
   }, _this);
@@ -108,8 +111,8 @@ function createEnemies(this: any, {
     repeat: -1,
   });
 
-  enemies.children.iterate(function (enemy: any) {
-    enemy.anims.play(`${enemySprite}Move`, true);
+  enemies.children.iterate(function (enemyObject: Phaser.GameObjects.GameObject) {
+    (enemyObject as Phaser.Physics.Arcade.Sprite).anims.play(`${enemySprite}Move`, true);
     return true;
   }, _this);
 

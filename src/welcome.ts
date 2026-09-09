@@ -1,3 +1,4 @@
+import { WASDKeys } from './types';
 import pinky from './assets/sprites/pinky-sm.png';
 import ground from './assets/platform.png';
 import tree from './assets/tree.png';
@@ -11,7 +12,7 @@ import constants from './constants';
 import createPlayer from './createPlayer';
 import handlePlayer from './handlePlayer';
 import setupCursors from './setupCursors';
-import setupWASD from './setupWASD.js';
+import setupWASD from './setupWASD';
 import createCoins from './createCoins';
 import createPlayerAnimations from './createPlayerAnimations';
 import createScoreText from './createScoreText';
@@ -19,12 +20,11 @@ import createScoreText from './createScoreText';
 const { canvasWidth, canvasHeight, playerVelocity, colors, debug, debugStartLevel } = constants;
 
 let welcomeText,
-    platforms: Phaser.GameObjects.Group,
     player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
     initialNumberOfCoins = 1,
     coinsToWin = initialNumberOfCoins,
     cursors: Phaser.Types.Input.Keyboard.CursorKeys | null,
-    wasd: any,
+    wasd: WASDKeys,
     score = { value: 0 },
     scoreText: Phaser.GameObjects.Text,
     winner = false;
@@ -77,8 +77,7 @@ function create(this: Phaser.Scene) {
   // coins
   createCoins({
     _this: this,
-    platforms: platforms as Phaser.Physics.Arcade.StaticGroup,
-    player: player as Phaser.Types.Physics.Arcade.SpriteWithDynamicBody, 
+    player,
     numberOfCoins: initialNumberOfCoins,
     score,
     scoreText,

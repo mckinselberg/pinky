@@ -66,7 +66,7 @@ function createSingleCoin({
 
 function createCoins({
   _this,
-  platforms,
+  platforms = null,
   player,
   numberOfCoins,
   score,
@@ -76,7 +76,7 @@ function createCoins({
   coinsToWin,
 }: {
   _this: Phaser.Scene,
-  platforms: Phaser.GameObjects.Group,
+  platforms?: Phaser.GameObjects.Group | null,
   player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
   numberOfCoins: number,
   score: { value: number },

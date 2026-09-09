@@ -1,4 +1,4 @@
-// import debounce from "./debounce";
+import { WASDKeys } from './types';
 import { Physics } from 'phaser';
 import constants from './constants';
 
@@ -33,7 +33,7 @@ function handlePlayer({
 }: {
   _this: Phaser.Scene,
   cursors: Phaser.Types.Input.Keyboard.CursorKeys,
-  wasd: any,
+  wasd: WASDKeys,
   player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
   velocity: number,
   playerIsHiding?: { value: boolean },
@@ -88,7 +88,7 @@ function handlePlayer({
     // right
     player.flipX = false;
     player.setVelocityX(velocity);
-    if ((cursors.up.isUp && cursors.down.isDown) || (wasd.up.isUp && wasd.down.isdown)) {
+    if ((cursors.up.isUp && cursors.down.isDown) || (wasd.up.isUp && wasd.down.isDown)) {
       if (!player.body) return;
       player.setVelocityY(player.body.velocity.y + 50);
     }

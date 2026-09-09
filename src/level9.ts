@@ -1,3 +1,4 @@
+import { WASDKeys } from './types';
 import createGameOverText from './createGameOverText';
 import createPlayer from './createPlayer';
 import createResetButton from './createResetButton';
@@ -8,48 +9,33 @@ import enemy from './assets/sprites/enemy.png';
 import enemy2 from './assets/sprites/enemy2.png';
 import FontFaceObserver from 'fontfaceobserver';
 import handlePlayer from './handlePlayer';
-import handleplayerIsHiding from './handleplayerIsHiding';
 import setupCursors from './setupCursors';
-import setupWASD from './setupWASD.js';
+import setupWASD from './setupWASD';
 import background from './assets/bg1.png';
 import bonusCoinImg from './assets/sprites/bonus-coin.png';
 import fireballImg from './assets/fireball.png';
 import createScoreText from './createScoreText';
 import createLevelText from './createLevelText';
 import createPlatform from './createPlatform';
-import { GameObjects } from 'phaser';
 
 const { canvasWidth, canvasHeight, playerVelocity, enemyPositions } = constants;
 
 let 
   cursors: Phaser.Types.Input.Keyboard.CursorKeys,
-  wasd: any,
+  wasd: WASDKeys,
   gameOver = { value: false },
   gameOverText: Phaser.GameObjects.Text,
   coinsToWin: number = 2,
-  platforms: Phaser.Physics.Arcade.StaticGroup,
   player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
-  playerIsHiding = { value: false },
-  playerHasInvincibility = { 
-    value: false,
-    powerUpActive: false,
-    powerUpMessage: '🔽 hide from aliens'
-  },
-  playerHasFireballs = { 
-    value: false,
-    powerUpActive: false,
-    powerUpMessage: 'F to shoot to shoot owls'
-  },
   score = { value: 0 },
   scoreText: Phaser.GameObjects.Text,
   successText: Phaser.GameObjects.Text,
-  trees: Phaser.Physics.Arcade.StaticGroup,
   winner = false,
   level = 9,
   levelText: Phaser.GameObjects.Text,
   movingPlatforms: Phaser.Physics.Arcade.Sprite[] = [],
   singleCoin: Phaser.Physics.Arcade.Sprite,
-  timeout: number,
+  timeout: ReturnType<typeof setTimeout>,
   finalCoinDropped = { value: false },
   stationaryPlatform1: Phaser.Physics.Arcade.Sprite,
   stationaryPlatform2: Phaser.Physics.Arcade.Sprite;
@@ -129,7 +115,6 @@ function create(this: Phaser.Scene) {
   singleCoin = createSingleCoin({
     _this: this,
     coinsToWin: coinsToWin,
-    platforms: platforms,
     player: player,
     score: score,
     scoreText: scoreText,
@@ -141,7 +126,7 @@ function create(this: Phaser.Scene) {
   this.physics.add.collider(singleCoin, stationaryPlatform2);
     
   // reset button
-  createResetButton({ _this: this, score, playerHasInvincibility, playerHasFireballs, finalCoinDropped });
+  createResetButton({ _this: this, score, finalCoinDropped });
   
   // success text
   successText = createSuccessText(this, level);
@@ -186,7 +171,6 @@ const update = function update(this: Phaser.Scene) {
     winner = false;
     score.value = 0;
     this.cameras.main.fadeOut(1000);
-    // @ts-ignore
     timeout = setTimeout(() => {
       this.scene.stop(`level${level}`);
       this.scene.start(`level${level + 1}`);
@@ -194,14 +178,12 @@ const update = function update(this: Phaser.Scene) {
     return;
   }
 
-  handleplayerIsHiding(this, player, trees, playerIsHiding);
-  handlePlayer({_this: this, cursors, wasd, player,velocity: playerVelocity, playerIsHiding, playerHasInvincibility});
+  handlePlayer({_this: this, cursors, wasd, player, velocity: playerVelocity});
   handleMovingPlatforms({ yVelocity: 100, xVelocity: 100 });
   if (score.value === 1 && !finalCoinDropped.value) {
     const singleCoin = createSingleCoin({
       _this: this,
       coinsToWin: coinsToWin,
-      platforms: platforms,
       player: player,
       score: score,
       scoreText: scoreText,

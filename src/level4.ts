@@ -1,9 +1,10 @@
+import { WASDKeys } from './types';
 import constants from './constants';
 import enemy from './assets/sprites/enemy.png';
 import enemy2 from './assets/sprites/enemy2.png';
 // import FontFaceObserver from 'fontfaceobserver';
 import setupCursors from './setupCursors';
-import setupWASD from './setupWASD.js';
+import setupWASD from './setupWASD';
 import createPlayer from './createPlayer';
 import handlePlayer from './handlePlayer';
 import createEnemies from './createEnemies';
@@ -27,13 +28,13 @@ let player: Phaser.Types.Physics.Arcade.SpriteWithDynamicBody,
       powerUpActive: false,
       powerUpMessage: '🔽 hide from blue guys.'
     },
-    trees: Phaser.GameObjects.Group,
+    trees: Phaser.Physics.Arcade.StaticGroup,
     colliderPlayerPlatform: Phaser.Physics.Arcade.Collider,
-    enemies: Phaser.GameObjects.Group,
-    enemies2: Phaser.GameObjects.Group,
+    enemies: Phaser.Physics.Arcade.Group,
+    enemies2: Phaser.Physics.Arcade.Group,
     platforms: Phaser.Physics.Arcade.StaticGroup,
     cursors: Phaser.Types.Input.Keyboard.CursorKeys,
-    wasd: any,
+    wasd: WASDKeys,
     score = { value: 0 },
     initialNumberOfCoins = 3,
     coinsToWin = initialNumberOfCoins + 1,
@@ -119,7 +120,7 @@ function create(this: Phaser.Scene) {
   colliderPlayerPlatform = this.physics.add.collider(player, platforms);
 
   for (let i = 0; i < initialNumberOfCoins; i++) {
-    i !== 3 && createSingleCoin({
+    createSingleCoin({
       _this: this,
       platforms: platforms,
       player: player,
